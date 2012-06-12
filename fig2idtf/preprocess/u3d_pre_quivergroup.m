@@ -84,7 +84,7 @@ for i=1:N
     %edges{1, i} = lc;
 end
 
-function [vertices, line_connectivity] = single_quiver_preprocessor(h)
+function [vertices, lines] = single_quiver_preprocessor(h)
 %% quiver body and head lines
 ch = get(h, 'Children');
 
@@ -118,13 +118,41 @@ nb = size(xb, 2);
 nh = size(xh, 2);
 n = nb /2; % number of quiver vectors
 
+disp(['Number of quiver vectors = ', num2str(n) ] )
+disp(['Number of body points = ', num2str(nb) ] )
+disp(['Number of head points = ', num2str(3*n), ' = ', num2str(nh) ] )
+
+vb = [xb; yb; zb];
+vh = [xh; yh; zh];
+
+%[vertices, lines] = one_line_per_quivergroup(n, vb, vh);
+
+% temporary way to avoid compression problems
+[vertices, lines] = chopped_quivergroup(vb, vh);
+
+function [vertices, lines] = chopped_quivergroup(vb, vh)
+vb = cut_line_to_pieces(vb, 2);
+vh = cut_line_to_pieces(vh, 3);
+
+nb = size(vb, 2);
+body_base = {[1; 2]-1};
+lb = repmat(body_base, 1, nb);
+
+nh = size(vh, 2);
+head_base = {[1:2; 2:3]-1};
+lh = repmat(head_base, 1, nh);
+
+vertices = [vb, vh];
+lines = [lb, lh];
+
+function [vertices, lines] = one_line_per_quivergroup(n, vb, vh)
 m = 2*n;
 body_indices = [1:2:m; 2:2:m] -1;
 
 base = [1:2; 2:3];
 
 j = -3;
-head_indices = nan(2, 2*n);
+head_indices = nan(2, m);
 for i=1:n
     j = j +3;
     idx = 2*(i-1) +(1:2);
@@ -132,22 +160,5 @@ for i=1:n
 end
 head_indices = head_indices +nb -1; % shift for proper referencing
 
-disp(['Number of quiver vectors = ', num2str(n) ] )
-disp(['Number of body points = ', num2str(m), ' = ', num2str(nb) ] )
-disp(['Number of head points = ', num2str(3*n), ' = ', num2str(nh) ] )
-
-vb = [xb; yb; zb];
-vh = [xh; yh; zh];
-
-%vertices = [vb, vh];
-%line_connectivity = [body_indices, head_indices];
-
-%% temporary way to avoid compression problems
-vb = cut_line_to_pieces(vb, 2);
-lb = cut_line_to_pieces(body_indices, 1);
-
-vh = cut_line_to_pieces(vh, 3);
-lh = cut_line_to_pieces(head_indices, 2);
-
-vertices = [vb, vh];
-line_connectivity = [lb, lh];
+vertices = [vb, vh]; % matrix
+lines = [body_indices, head_indices]; % matrix

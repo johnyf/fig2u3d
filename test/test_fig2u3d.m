@@ -5,24 +5,27 @@ ax = gca;
 hold(ax, 'on')
 
 %% surf
-sphere(3)
+sphere(2)
 
 %% line
+%
 t = linspace(0, 10, 10);
 x = [cos(t); sin(t); t];
 plotmd(ax, x)
 
+plotmd(ax, x+1)
+%
 %% quiver3
-%{
-n = 10;
+%
+n = 3;
 x = 10 *rand(3, n);
 v = rand(3, n);
 quivermd(ax, x, v)
-%}
+%
 %% view
 axis(ax, 'equal')
 axis(ax, 'tight')
-
+view(ax, 3)
 
 fig2u3d(gca, 'test');
 
