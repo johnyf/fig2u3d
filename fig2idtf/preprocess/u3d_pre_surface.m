@@ -1,4 +1,4 @@
-function [vertices, faces, facevertexcdata] = u3d_pre_surface(ax)
+function [vertices, faces, facevertexcdata, renderer] = u3d_pre_surface(ax)
 %U3D_PRE_SURFACE    Preprocess surface output to u3d.
 %    U3D_PRE generates the input for the MESH_TO_LATEX function from
 %    Alexandre Gramfort from your surface-graphs. The surface graphs 3d-model can be
@@ -64,18 +64,20 @@ N = size(sh, 1); % number of surfaces
 vertices = cell(1, N);
 faces = cell(1, N);
 facevertexcdata = cell(1, N);
+renderer = cell(1, N);
 for i=1:N
     disp(['     Preprocessing surface No.', num2str(i) ] );
     h = sh(i, 1);
     
-    [v, f, fvx] = single_surf_preprocessor(h);
+    [v, f, fvx, r] = single_surf_preprocessor(h);
     
     vertices{1, i} = v;
     faces{1, i} = f;
     facevertexcdata{1, i} = fvx;
+    renderer{1, i} = r;
 end
 
-function [vertices, faces, facevertexcdata] = single_surf_preprocessor(h)
+function [vertices, faces, facevertexcdata, renderer] = single_surf_preprocessor(h)
 % get defined data-points
 X = get(h, 'XData');
 Y = get(h, 'YData');
@@ -114,6 +116,14 @@ fvc = surf2patch(X, Y, Z, realcolor, 'triangles');
 vertices = fvc.vertices;
 faces = fvc.faces;
 facevertexcdata = fvc.facevertexcdata;
+
+% shading -> renderer in adobe reader
+edgecolor = get(h, 'EdgeColor');
+if strcmp(edgecolor, 'none')
+    renderer = 'Solid';
+else
+    renderer = 'SolidWireframe';
+end
 
 %% surface concatenation (obsolete - although it reduces file size)
 %tempfvc.faces = tempfvc.faces +V; % shift to account for previous vertices

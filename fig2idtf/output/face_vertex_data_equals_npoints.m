@@ -1,14 +1,12 @@
 function [count] = face_vertex_data_equals_npoints(fid,...
                             surface_vertices, faces, face_vertex_data,...
-                            line_vertices, line_edges,...
-                            quiver_vertices, quiver_edges)
+                            line_vertices, line_edges, line_colors)
 %FACE_VERTEX_DATA_EQUALS_NPOINTS    Export multiple surfaces, lines, quivers.
 %
 % usage
 %   count = face_vertex_data_equals_npoints(fid,...
 %                            surface_vertices, faces, face_vertex_data,...
-%                            line_vertices, line_edges,...
-%                            quiver_vertices, quiver_edges)
+%                            line_vertices, line_edges)
 %
 % input
 %   fid = output file handle
@@ -40,7 +38,6 @@ function [count] = face_vertex_data_equals_npoints(fid,...
 
 n_meshes = size(faces, 2);
 n_lines = size(line_vertices, 2);
-n_quivers = size(quiver_vertices, 2);
 
 %% nodes
 mesh_node = mesh_node_str;
@@ -59,27 +56,17 @@ for i=1:n_lines
 end
 %disp(line_nodes)
 
-quiver_node = line_node_str;
-quiver_nodes = '';
-for i=1:n_quivers
-    cur_quiver_node = sprintf(quiver_node, i, i);
-    quiver_nodes = [quiver_nodes, '\n\n', cur_quiver_node];
-end
-%disp(line_nodes)
-
-nodes = [mesh_nodes, '\n', line_nodes, '\n', quiver_nodes];
+nodes = [mesh_nodes, '\n', line_nodes];
 
 %% resources
 mesh_resources = populate_mesh_resource_str(faces, surface_vertices, face_vertex_data);
 n_resources = n_meshes;
-line_resources = populate_line_resource_str(line_vertices, line_edges, n_resources);
-n_resources = n_meshes +n_lines;
-quiver_resources = populate_line_resource_str(quiver_vertices, quiver_edges, n_resources);
+line_resources = populate_line_resource_str(line_vertices, line_edges, line_colors, n_resources);
 
-mesh_line_resources = [mesh_resources, '\n', line_resources, '\n', quiver_resources];
+mesh_line_resources = [mesh_resources, '\n', line_resources];
 
 resource_list = resource_list_model_str;
-total_resource_number = n_meshes +n_lines +n_quivers;
+total_resource_number = n_meshes +n_lines;
 resources = sprintf(resource_list, total_resource_number,...
                              mesh_line_resources);
 
@@ -124,6 +111,7 @@ NODE "MODEL" {
           }
      }
      RESOURCE_NAME "MyMesh%d"
+     MODEL_VISIBILITY "BOTH"
 }
 %}
 

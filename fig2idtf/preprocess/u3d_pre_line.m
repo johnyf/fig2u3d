@@ -1,4 +1,4 @@
-function [vertices, edges] = u3d_pre_line(ax)
+function [vertices, edges, colors] = u3d_pre_line(ax)
 %U3D_PRE_LINE   Preprocess line output to u3d.
 %
 % usage
@@ -35,6 +35,7 @@ end
 if isempty(sh)
     vertices = [];
     edges = [];
+    colors = [];
     disp('No lines found.');
     return
 end
@@ -43,17 +44,19 @@ end
 N = size(sh, 1); % number of lines
 vertices = cell(1, N);
 edges = cell(1, N);
+colors = cell(1, N);
 k = 0;
 for i=1:N
     disp(['     Preprocessing line No.', num2str(i) ] );
     h = sh(i, 1);
     
-    [curvertices, curedges] = single_line_preprocessor(h);
+    [curvertices, curedges, curcolor] = single_line_preprocessor(h);
     
     n = size(curvertices, 2);
     
     vertices(1, k+(1:n) ) = curvertices;
     edges(1, k+(1:n) ) = curedges;
+    colors(1, k+(1:n) ) = curcolor;
     
     k = k +n;
     
@@ -61,12 +64,14 @@ for i=1:N
     %edges{1, i} = curedges;
 end
 
-function [vertices, edges] = single_line_preprocessor(h)
+function [vertices, edges, line_colors] = single_line_preprocessor(h)
 
 % get defined data-points
 X = get(h, 'XData');
 Y = get(h, 'YData');
 Z = get(h, 'ZData');
+
+line_color = get(h, 'Color');
 
 % 2d line ?
 if isempty(Z)
@@ -85,12 +90,23 @@ v = cut_line_to_pieces(v, 10);
 n = size(v, 2);
 vertices = cell(1, n);
 edges = cell(1, n);
+line_colors = cell(1, n);
 for i=1:n
     curv = v{1, i};
+    
+    % connect to next line
+    nv = size(curv, 2);
+    if i < n
+        next_line_v = v{1, i+1};
+        vertex1_in_next_line = next_line_v(:, 1);
+        
+        curv(:, nv) = vertex1_in_next_line;
+    end
     
     npnt = size(curv, 2);
     curedges = [1:(npnt-1); 2:npnt]-1;
     
     vertices{1, i} = curv;
     edges{1, i} = curedges;
+    line_colors{1, i} = line_color;
 end
