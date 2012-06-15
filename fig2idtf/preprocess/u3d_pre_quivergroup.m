@@ -1,9 +1,9 @@
-function [vertices, edges] = u3d_pre_quivergroup(ax)
+function [vertices, edges, colors] = u3d_pre_quivergroup(ax)
 %U3D_PRE_QUIVERGROUP    Preprocess quiver output to u3d.
 %
 % usage
-%   [vertices, edges] = U3D_PRE_QUIVERGROUP
-%   [vertices, edges] = U3D_PRE_QUIVERGROUP(ax)
+%   [vertices, edges, colors] = U3D_PRE_QUIVERGROUP
+%   [vertices, edges, colors] = U3D_PRE_QUIVERGROUP(ax)
 %
 % optional input
 %   ax = axes object handle
@@ -21,6 +21,9 @@ function [vertices, edges] = u3d_pre_quivergroup(ax)
 %         = {[2 x #lines], ...}
 %           where: [2 x #lines] = [start_index1, ...;
 %                                  end_index1, ...];
+%   colors = RGB colors of quivergroups
+%          = {1 x #quivergroups}
+%          = {[r, g, b], [r, g, b], ... }
 %
 % See also FIG2IDTF, U3D_PRE_LINE, U3D_PRE_SURFACE.
 %
@@ -66,25 +69,30 @@ end
 N = size(sh, 1); % number of quivergroups
 vertices = cell(1, N);
 edges = cell(1, N);
+colors = cell(1, N);
 k = 0;
 for i=1:N
     disp(['     Preprocessing quivergroup No.', num2str(i) ] );
     h = sh(i, 1);
     
-    [v, lc] = single_quiver_preprocessor(h);
+    [v, lc, col] = single_quiver_preprocessor(h);
     
     n = size(v, 2);
+    if n ~= 0
+        I = k +(1:n);
+        
+        vertices(1, I) = v;
+        edges(1, I) = lc;
+        colors(1, I) = col;
     
-    vertices(1, k+(1:n) ) = v;
-    edges(1, k+(1:n) ) = lc;
-    
-    k = k +n;
+        k = k +n;
+    end
     
     %vertices{1, i} = v;
     %edges{1, i} = lc;
 end
 
-function [vertices, lines] = single_quiver_preprocessor(h)
+function [vertices, lines, colors] = single_quiver_preprocessor(h)
 %% quiver body and head lines
 ch = get(h, 'Children');
 
@@ -129,6 +137,10 @@ vh = [xh; yh; zh];
 
 % temporary way to avoid compression problems
 [vertices, lines] = chopped_quivergroup(vb, vh);
+
+quiver_color = {get(h, 'Color') };
+m = size(vertices, 2);
+colors = repmat(quiver_color, 1, m);
 
 function [vertices, lines] = chopped_quivergroup(vb, vh)
 vb = cut_line_to_pieces(vb, 2);

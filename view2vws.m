@@ -96,6 +96,7 @@ str = [fileinfo, views];
 
 %% part renderers
 n = size(part_renderers, 2);
+part_strs = cell(1, n);
 for i=1:n
     s = part_str;
     
@@ -103,9 +104,9 @@ for i=1:n
     part_rendermode = part_renderers{1, i};
     
     s = sprintf(s, partname, part_rendermode);
-    str = [str, s];
+    part_strs{1, i} = s;
 end
-
+str = [str, part_strs{:} ];
 str = [str, closing];
 
 %% export to file

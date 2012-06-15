@@ -56,6 +56,7 @@ if isempty(sh)
     vertices            = [];
     faces               = [];
     facevertexcdata     = [];
+    renderer = [];
     return
 end
 

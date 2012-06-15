@@ -38,5 +38,9 @@ if isempty(strfind(fout, '.u3d') )
 end
 
 %% convert
-idtf2u3dcmd = ['!IDTFConverter.exe -input ', fin, ' -output ', fout];
-eval(idtf2u3dcmd)
+idtf2u3dcmd = ['IDTFConverter.exe -input ', fin, ' -output ', fout];
+c = system(idtf2u3dcmd);
+
+if c ~= 0
+    error('idtf2u3d:conversion', 'IDTFConverter.exe returned with error.')
+end

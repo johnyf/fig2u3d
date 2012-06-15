@@ -13,7 +13,7 @@ function [line_resources] = populate_line_resource_str(line_vertices, line_lines
 %   verbatim
 
 n_lines = size(line_vertices, 2);
-line_resources = '';
+tmp_line_resources = cell(1, n_lines);
 for i=1:n_lines
     cur_line_points = line_vertices{1, i};
     cur_line_edges = line_lines{1, i};
@@ -22,8 +22,9 @@ for i=1:n_lines
     cur_line_resource = single_line_resource_str(cur_line_points,...
                                          cur_line_edges, i, cur_line_color, n_resources);
     
-    line_resources = [line_resources, '\n\n', cur_line_resource];
+    tmp_line_resources{1, i} = ['\n\n', cur_line_resource];
 end
+line_resources = [tmp_line_resources{:} ];
 %disp(line_resources)
 
 function [line_resource_str] = single_line_resource_str(vertices, edges,...

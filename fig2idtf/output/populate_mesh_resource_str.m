@@ -14,7 +14,7 @@ function [mesh_resources] = populate_mesh_resource_str(f, v, c)
 
 n_meshes = size(f, 2);
 mesh_resource = resource_mesh_str;
-mesh_resources = '';
+tmp_mesh_resources = cell(1, n_meshes);
 for i=1:n_meshes
     faces = f{1, i};
     points = v{1, i};
@@ -23,12 +23,12 @@ for i=1:n_meshes
     if ~isempty(face_vertex_data) && size(face_vertex_data, 2) ~= 3
         error('IDTF colors should be RGB');
     end
-    nface_vertex_data = size(face_vertex_data, 1);
+    %nface_vertex_data = size(face_vertex_data, 1);
     
     nfaces = size(faces, 1);
     npoints = size(points, 1);
     
-    [face_vertex_data_unique, tmp, face_vertex_data_idx] = ...
+    [face_vertex_data_unique, ~, face_vertex_data_idx] = ...
                                 unique(face_vertex_data, 'rows');
     nface_vertex_data_unique = size(face_vertex_data_unique, 1);
 
@@ -40,8 +40,8 @@ for i=1:n_meshes
     strfaces_colors = sprintf('%d %d %d\n', face_vertex_data_idx(faces).'-1);
     strpoints = sprintf('%f %f %f\n', points.');
     
-    normals = mesh_normals(points, faces);
-    strnormals = sprintf('%f %f %f\n', normals.');
+    %normals = mesh_normals(points, faces);
+    %strnormals = sprintf('%f %f %f\n', normals.');
     strshading = sprintf('%d\n', zeros(nfaces, 1) );
     strcolors = sprintf('%f %f %f\n', face_vertex_data_unique.');
     
@@ -51,8 +51,9 @@ for i=1:n_meshes
                 nface_vertex_data_unique, strfaces,...
                 strshading, strfaces_colors, strpoints, strcolors);
             
-    mesh_resources = [mesh_resources, '\n\n', cur_mesh_resource];
+    tmp_mesh_resources{1, i} = ['\n\n', cur_mesh_resource];
 end
+mesh_resources = [tmp_mesh_resources{:} ];
 %disp(mesh_resources)
 
 function [str] = resource_mesh_str

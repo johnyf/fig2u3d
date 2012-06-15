@@ -1,4 +1,4 @@
-function [vertices, edges, colors] = u3d_pre_line(ax)
+function [vertices, edges, colors, points, point_colors] = u3d_pre_line(ax)
 %U3D_PRE_LINE   Preprocess line output to u3d.
 %
 % usage
@@ -23,6 +23,10 @@ function [vertices, edges, colors] = u3d_pre_line(ax)
 % Purpose:   preprocess lineseries children of axes for u3d export
 % Copyright: Ioannis Filippidis, 2012-
 
+% depends
+%   create_marker_lines, cut_line_to_pieces
+%   arclength, meshgrid2vec
+
 %% input
 if nargin < 1
     sh = findobj('type', 'line');
@@ -42,50 +46,168 @@ end
 
 %% process each line
 N = size(sh, 1); % number of lines
-vertices = cell(1, N);
-edges = cell(1, N);
-colors = cell(1, N);
+vertices = cell(0); % init is pointless when chopping is implemented
+edges = cell(0);
+colors = cell(0);
 k = 0;
+points = cell(0);
+point_colors = cell(0);
+m = 0;
 for i=1:N
     disp(['     Preprocessing line No.', num2str(i) ] );
     h = sh(i, 1);
     
-    [curvertices, curedges, curcolor] = single_line_preprocessor(h);
+    % linestyle represented by 
+    [curvertices, curedges, curcolor] = line_prep(h);
     
+    % add linesets due to linestyle
     n = size(curvertices, 2);
     
-    vertices(1, k+(1:n) ) = curvertices;
-    edges(1, k+(1:n) ) = curedges;
-    colors(1, k+(1:n) ) = curcolor;
+    if n ~= 0
+        I = k +(1:n);
+
+        vertices(1, I) = curvertices;
+        edges(1, I) = curedges;
+        colors(1, I) = curcolor;
     
-    k = k +n;
+        k = k +n;
+    end
+    
+    [curvertices, curedges, curcolor, curpoints, curpoint_colors] = marker_prep(h);
+    
+    % add linesets due to markers
+    n = size(curvertices, 2);
+    if n ~= 0
+        I = k +(1:n);
+
+        vertices(1, I) = curvertices;
+        edges(1, I) = curedges;    
+        colors(1, I) = curcolor;
+
+        k = k +n;
+    end
+    
+    % add pointsets due to linesets and markers
+    n = size(curpoints, 2);
+    if n ~= 0
+        I = m +(1:n);
+    
+        points(1, I) = curpoints;
+        point_colors(1, I) = curpoint_colors;
+
+        m = m +n;
+    end
     
     %vertices{1, i} = curvertices;
     %edges{1, i} = curedges;
 end
 
-function [vertices, edges, line_colors] = single_line_preprocessor(h)
+function [vertices, edges, line_colors, points, point_color] = marker_prep(h)
+% init linesets
+vertices = {};
+edges = {};
+line_colors = {};
 
-% get defined data-points
-X = get(h, 'XData');
-Y = get(h, 'YData');
-Z = get(h, 'ZData');
+% init pointsets
+points1 = {};
+point_color1 = {};
 
-line_color = get(h, 'Color');
+points2 = {};
+point_color2 = {};
 
-% 2d line ?
-if isempty(Z)
-    Z = zeros(size(X) );
+%% interpolate dots ?
+linestyle = get(h, 'LineStyle');
+if strcmp(linestyle, ':')
+    % (this is linestyle producing points)
+    % interpolate
+    p = get_line_xyz(h);
+
+    points1 = dots_linestyle(p);
+    
+    n = size(points1, 2);
+    point_color1 = {get(h, 'Color') };
+    point_color1 = repmat(point_color1, 1, n);
 end
 
-v = meshgrid2vec(X, Y, Z);
+%% Marker Style ?
+markerstyle = get(h, 'Marker');
+switch markerstyle
+    case 'none'
+        disp('This line has: Marker = ''none''.')
+    case '.'
+        % . = point
+        % marker producing pointset
+        points2 = get_line_xyz(h);
+        
+        % reduce problems due to compression by IDTFConverter
+        piece_size = 10;
+        points2 = cut_line_to_pieces(points2, piece_size);
+        
+        n = size(points2, 2);
+        point_color2 = {get(h, 'Color') };
+        point_color2 = repmat(point_color2, 1, n);
+    otherwise
+        [vertices, edges, line_colors] = create_marker_lines(h, markerstyle);
+end
+
+points = [points1, points2];
+point_color = [point_color1, point_color2];
+
+function [points] = dots_linestyle(p)
+[L, dL] = arclength(p);
+d = L /100; % distance between dots
+
+dL = dL.'; % [1 x #segments]
+n = size(dL, 2); % number of segments
+
+points = cell(1, n);
+for i=1:n
+    p1 = p(:, i);
+    p2 = p(:, i+1);
+    
+    curdL = dL(1, i);
+    
+    m = floor(curdL /d) +1; % # of dots between two consecutive line points
+    dots = linspacendim(p1, p2, m);
+    
+    points{1, i} = dots;
+end
+
+function [vertices, edges, line_colors] = line_prep(h)
+% no line visible ?
+linestyle = get(h, 'LineStyle');
+disp(['This line has: LineStyle = ''', linestyle, '''.'] )
+switch linestyle
+    case {'none', '.', ':'}
+        disp('No line for this lineseries exported to u3d.')
+        vertices = {};
+        edges = {};
+        line_colors = {};
+        return
+    case '-'
+        % solid or dashdot
+        % (the dot part of dashdot is handled by marker_prep)
+        dashratio = 0;
+        [vertices, edges, line_colors] = solid_line_prep(h, dashratio);
+    case '--'
+        % dashed
+        dashratio = 0.5;
+        [vertices, edges, line_colors] = solid_line_prep(h, dashratio);
+    otherwise
+        error('Unknown LineStyle')
+end
+
+function [vertices, edges, line_colors] = solid_line_prep(h, dashratio)
+v = get_line_xyz(h);
+line_color = get(h, 'Color');
 
 %vertices = v;
 %npnt = size(vertices, 2);
 %edges = [1:(npnt-1); 2:npnt]-1;
 
 %% temporary solution to reduces compression problems
-v = cut_line_to_pieces(v, 10);
+piece_size = 10;
+v = cut_line_to_pieces(v, piece_size);
 
 n = size(v, 2);
 vertices = cell(1, n);
@@ -94,19 +216,41 @@ line_colors = cell(1, n);
 for i=1:n
     curv = v{1, i};
     
-    % connect to next line
-    nv = size(curv, 2);
+    %% connect to next line
     if i < n
+        nv = size(curv, 2);
         next_line_v = v{1, i+1};
         vertex1_in_next_line = next_line_v(:, 1);
         
         curv(:, nv) = vertex1_in_next_line;
     end
     
+    %% dashed style ?
+    if 0 < dashratio
+        nv = floor(piece_size /2);
+        nv = max(1, nv);
+        curv = curv(:, 1:nv); % keep half
+    end
+    
+    %% create line
     npnt = size(curv, 2);
     curedges = [1:(npnt-1); 2:npnt]-1;
     
+    %% output
     vertices{1, i} = curv;
     edges{1, i} = curedges;
     line_colors{1, i} = line_color;
 end
+
+function [p] = get_line_xyz(h)
+% get defined data-points
+x = get(h, 'XData');
+y = get(h, 'YData');
+z = get(h, 'ZData');
+
+% 2d line ?
+if isempty(z)
+    z = zeros(size(x) );
+end
+
+p = [x; y; z];

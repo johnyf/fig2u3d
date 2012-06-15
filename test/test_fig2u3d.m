@@ -29,5 +29,5 @@ view(ax, 3)
 
 fig2u3d(gca, 'test');
 
-!cp test.u3d ..\tex\personal\3dheart\img\test.u3d
-!cp test.vws ..\tex\personal\3dheart\img\test.vws
+copyfile('test.u3d', '..\tex\personal\3dheart\img\test.u3d')
+copyfile('test.vws', '..\tex\personal\3dheart\img\test.vws')
