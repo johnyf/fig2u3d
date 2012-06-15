@@ -1,12 +1,11 @@
-%function [] = test_spiral
-%close all
+%function [] = test_fig2u3d_spiral
 
+clf
 t = linspace(0, 10, 100);
+x = [t; cos(t); sin(t) ];
 
-x = [cos(t); sin(t); t];
 ax = gca;
-
-plotmd(ax, x, ':')
+plotmd(ax, x, 'h')
 
 fig2u3d(ax, 'test')
 

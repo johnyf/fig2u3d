@@ -61,6 +61,7 @@ sh(isnan(sh) ) = [];
 if isempty(sh)
     vertices = [];
     edges = [];
+    colors = [];
     disp('No quivergroups found.');
     return
 end

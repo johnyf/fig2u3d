@@ -24,7 +24,7 @@ function [vertices, edges, colors, points, point_colors] = u3d_pre_line(ax)
 % Copyright: Ioannis Filippidis, 2012-
 
 % depends
-%   create_marker_lines, cut_line_to_pieces
+%   create_marker_lines, cut_line_to_pieces, get_line_xyz
 %   arclength, meshgrid2vec
 
 %% input
@@ -40,6 +40,9 @@ if isempty(sh)
     vertices = [];
     edges = [];
     colors = [];
+    
+    points = [];
+    point_colors = [];
     disp('No lines found.');
     return
 end
@@ -62,7 +65,6 @@ for i=1:N
     
     % add linesets due to linestyle
     n = size(curvertices, 2);
-    
     if n ~= 0
         I = k +(1:n);
 
@@ -241,16 +243,3 @@ for i=1:n
     edges{1, i} = curedges;
     line_colors{1, i} = line_color;
 end
-
-function [p] = get_line_xyz(h)
-% get defined data-points
-x = get(h, 'XData');
-y = get(h, 'YData');
-z = get(h, 'ZData');
-
-% 2d line ?
-if isempty(z)
-    z = zeros(size(x) );
-end
-
-p = [x; y; z];

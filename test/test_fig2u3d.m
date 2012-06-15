@@ -11,16 +11,16 @@ sphere(20)
 %
 t = linspace(0, 10, 100);
 x = [cos(t); sin(t); t];
-plotmd(ax, x)
+plotmd(ax, x, 'b-*')
 
-plotmd(ax, x+1)
+plotmd(ax, x+1, 'ro')
 %
 %% quiver3
 %
 n = 8;
 x = 10 *rand(3, n);
 v = rand(3, n);
-quivermd(ax, x, v)
+quivermd(ax, x, v, 'g')
 %
 %% view
 axis(ax, 'equal')

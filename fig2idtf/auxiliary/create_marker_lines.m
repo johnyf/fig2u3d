@@ -6,10 +6,10 @@ function [vertices, edges, line_colors] = create_marker_lines(h, type)
 % Purpose:   create linesets for markers which are not points
 % Copyright: Ioannis Filippidis, 2012-
 
-% get defined data-points
-x = get(h, 'XData');
-y = get(h, 'YData');
-z = get(h, 'ZData');
+% depends
+%   get_line_xyz
+
+p = get_line_xyz(h);
 
 switch type
     case 'o'
@@ -20,9 +20,9 @@ switch type
         type = 'plus_marker';
     case '*'
         type = 'star_marker';
-    case 's'
+    case 'square'
         type = 'square_marker';
-    case 'd'
+    case 'diamond'
         type = 'diamond_marker';
     case 'v'
         type = 'down_triangle_marker';
@@ -32,15 +32,15 @@ switch type
         type = 'left_triangle_marker';
     case '>'
         type = 'right_triangle_marker';
-    case 'p'
+    case 'pentagram'
         type = 'pentagram_marker';
-    case 'h'
+    case 'hexagram'
         type = 'hexagram_marker';
     otherwise
         error('Unknown marker style.')
 end
+disp(['      MarkerStyle = ', type] );
 
-p = [x; y; z];
 dp = diff(p, 1, 2);
 d = vnorm(dp);
 r = min(d) /6;  % 1/6 minimal distance between consecutive points,
@@ -96,26 +96,42 @@ vertices = r *[-1, 0; 1, 0; 0, -1; 0, 1].';
 edges = [1, 3; 3, 2; 2, 4; 4, 1].' -1;
 
 function [vertices, edges] = down_triangle_marker(r)
-vertices = r *[-1, 0; 0, -1; 1, 0];
+vertices = r *[-1, 0; 0, -1; 1, 0].';
 edges = [1, 2; 2, 3].' -1;
 
 function [vertices, edges] = up_triangle_marker(r)
-vertices = r *[-1, 0; 0, 1; 1, 0];
+vertices = r *[-1, 0; 0, 1; 1, 0].';
 edges = [1, 2; 2, 3].' -1;
 
 function [vertices, edges] = left_triangle_marker(r)
-vertices = r *[0, -1; 1, 0; 0, 1];
+vertices = r *[0, -1; 1, 0; 0, 1].';
 edges = [1, 2; 2, 3].' -1;
 
 function [vertices, edges] = right_triangle_marker(r)
-vertices = r *[0, -1; -1, 0; 0, 1];
+vertices = r *[0, -1; -1, 0; 0, 1].';
 edges = [1, 2; 2, 3].' -1;
 
 function [vertices, edges] = pentagram_marker(r)
+r = r /100;
 vertices = r *[0, 85; 75, 75; 100, 10; 125, 75;
                200, 85; 150, 125; 160, 190; 100, 150;
                40, 190; 50, 125; 0, 85].';
 edges = [1:10, 11; 2:11, 1] -1;
 
 function [vertices, edges] = hexagram_marker(r)
-%todo
+r1 = r;
+r2 = r1 /2;
+
+n = 7;
+t = linspace(0, 2*pi, n);
+x1 = r1 *[cos(t); sin(t) ];
+
+t2 = t +pi /n;
+x2 = r2 *[cos(t2); sin(t2) ];
+
+m = 2 *n;
+x(:, 1:2:m) = x1;
+x(:, 2:2:m) = x2;
+
+vertices = x;
+edges = [1:m; 2:m, 1] -1;

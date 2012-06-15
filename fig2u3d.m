@@ -69,6 +69,7 @@ plot_axes(addaxes)
 [line_vertices, line_edges, line_colors,...
  line_points, line_point_colors] = u3d_pre_line(ax);
 [quiver_vertices, quiver_edges, quiver_colors] = u3d_pre_quivergroup(ax);
+[contour_vertices, contour_edges, contour_colors] = u3d_pre_contourgroup(ax);
 
 %% group meshes, line_sets and point_sets
 % aggregate meshes
@@ -77,9 +78,9 @@ mesh_faces = faces;
 mesh_colors = facevertexcdata;
 
 % aggregate lines
-line_vertices = [line_vertices, quiver_vertices];
-line_edges = [line_edges, quiver_edges];
-line_colors = [line_colors, quiver_colors];
+line_vertices = [line_vertices, quiver_vertices, contour_vertices];
+line_edges = [line_edges, quiver_edges, contour_edges];
+line_colors = [line_colors, quiver_colors, contour_colors];
 
 % aggregate pointsets
 pointset_points = line_points;
