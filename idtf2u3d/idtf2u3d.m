@@ -1,46 +1,104 @@
-function [] = idtf2u3d(fin, fout)
+function [] = idtf2u3d(idtffile, u3dfile)
 %IDTF2U3D   Convert IDTF to U3D file.
 %
 % usage
-%   idtf2u3d(IDTF_filename)
-%   idtf2u3d(IDTF_filename, U3D_filename)
+%   IDTF2U3D
+%   IDTF2U3D(IDTF_filename)
+%   IDTF2U3D(IDTF_filename, U3D_filename)
 %
-% See also FIG2U3D.
+% optional input
+%   idtffile = filename string for IDTF file (default = 'matfig.idtf')
+%   u3dfile = filename string for U3D file (default = 'matfig.u3d')
+%
+% output
+%   Conerts the IDTF file into a U3D file which is saved to the disk.
+%
+% note
+%   If only IDTF file name is provided without extension, then the '.idtf'
+%   file extension is appended and the U3D file uses the same name with the
+%   '.u3d' file extension appended.
+%
+%   If only the IDTF file name is provided with the extension '.idtf', then
+%   the U3D file uses the same name with the '.idtf' extension replaced by
+%   the extension '.u3d'.
+%
+%   If both file names are provided, any one without the appropriate
+%   extension gets appended with that extension ('.idtf' and '.u3d',
+%   respectively).
+%
+% reference
+%   IDTF (Intermediate Data Text File) Format Description, Version 100,
+%   Intel Corporation, 2005, available at:
+%       http://u3d.svn.sourceforge.net/viewvc/u3d/releases/Gold12Update/Docs/IntermediateFormat/IDTF%20Format%20Description.pdf
+%
+% See also FIG2U3D, FIG2PDF3D, FIG2IDTF.
 %
 % File:      idtf2u3d.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
-% Date:      2011.02.17 - 2012.06.09
+% Date:      2011.02.17 - 2012.06.21
 % Language:  MATLAB R2012a
 % Purpose:   convert IDTF file to U3D file format
-% Copyright: Ioannis Filippidis, 2011-
+%
+% Based on MESH_TO_LATEX.m by Alexandre Gramfort, which is part of
+% "Matlab mesh to PDF with 3D interactive object"
+% which is Copyright (c) by Alexandre Gramfort under the BSD License
+% The link on the MATLAB Central File Exchange is:
+% http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 
 % depends
-%   IDTFConverter.exe in system path
+%   clear_file_extension, check_file_extension
+%   IDTFConverter executables in ./bin directory
 
 %% input
 if nargin < 1
-    fin = 'surface.idtf';
-    fout = 'surface.u3d';
+    idtffile = 'matfig.idtf';
+    u3dfile = 'matfig.u3d';
 end
 
 if nargin < 2
-    fout = strrep(fin, '.idtf', '');
-    fout = [fout, '.u3d'];
+    u3dfile = clear_file_extension(idtffile, '.idtf');
 end
+
+%% filenames & extensions
 
 % fname extensions ok ?
-if isempty(strfind(fin, '.idtf') )
-    fin = [fin, '.idtf'];
+idtffile = full_fname_with_extension(idtffile, 'idtf');
+u3dfile = full_fname_with_extension(u3dfile, 'u3d');
+
+%% prepare command
+mfiledir = fileparts(mfilename('fullpath') );
+
+IDTFcmd = 'IDTFConverter';
+if isunix
+    if strcmp('MACI', computer)
+        % Intel Mac
+        temp = [getenv('DYLD_LIBRARY_PATH'), ':"', mfiledir, '/bin/maci/"'];
+        setenv('DYLD_LIBRARY_PATH', temp)
+        IDTFcmd = ['"', mfiledir, '/bin/maci/', IDTFcmd, '"'];
+    else
+        % Linux
+        temp = [getenv('LD_LIBRARY_PATH'), ':"', mfiledir, '/bin/glx/"'];
+        setenv('LD_LIBRARY_PATH', temp)
+        IDTFcmd = ['"', mfiledir, '/bin/glx/', IDTFcmd, '.sh"'];
+    end
+else
+    % windows
+    win_mfiledir = strrep(mfiledir, '\', '\\');
+    IDTFcmd = ['"', win_mfiledir, '\\bin\\w32\\', IDTFcmd, '.exe"'];
 end
 
-if isempty(strfind(fout, '.u3d') )
-    fout = [fout, '.u3d'];
-end
+%% idtf -> u3d conversion
+s = [IDTFcmd, ' -input "%s" -output "%s"'];
+idtf2u3dcmd = sprintf(s, idtffile, u3dfile);
+disp(idtf2u3dcmd)
+[status, result] = system(idtf2u3dcmd);
 
-%% convert
-idtf2u3dcmd = ['IDTFConverter.exe -input ', fin, ' -output ', fout];
-c = system(idtf2u3dcmd);
-
-if c ~= 0
-    error('idtf2u3d:conversion', 'IDTFConverter.exe returned with error.')
+if status ~= 0
+    error('idtf2u3d:conversion',...
+          'IDTFConverter.exe returned with error.')
 end
+disp(result)
+
+function [fname] = full_fname_with_extension(fname, extension)
+fname = check_file_extension(fname, extension);
+fname  = fullfile(cd, fname);

@@ -7,25 +7,26 @@ nface_vertex_data_unique = size(face_vertex_data_unique,1);
 str = node_resource_list_str;
 count = fprintf(fid, str, nfaces, npoints, npoints, nface_vertex_data_unique);
 
-idx = [0:(nfaces-1)]';
-shidx = [0:(nface_vertex_data_unique-1)]';
+idx = [0:(nfaces-1)].';
+shidx = [0:(nface_vertex_data_unique-1)].';
 str = shading_description_str;
-count = fprintf(fid,str,[shidx,shidx]');
+count = fprintf(fid, str, [shidx, shidx].');
 
 str = mesh_data_str;
 
-strfaces = sprintf('%d %d %d\n',faces'-1);
-strpoints = sprintf('%f %f %f\n',points');
-strnormals = sprintf('%f %f %f\n',normals');
+strfaces = sprintf('%d %d %d\n', faces.'-1);
+strpoints = sprintf('%f %f %f\n', points.');
+strnormals = sprintf('%f %f %f\n', normals');
 % stridx = sprintf('%d\n',idx);
-str_face_vertex_data_idx = sprintf('%d\n',face_vertex_data_idx-1);
-count = fprintf(fid,str,strfaces,strfaces,str_face_vertex_data_idx,strpoints,strnormals,nface_vertex_data_unique);
+str_face_vertex_data_idx = sprintf('%d\n', face_vertex_data_idx-1);
+count = fprintf(fid, str, strfaces, strfaces, str_face_vertex_data_idx,...
+                strpoints, strnormals, nface_vertex_data_unique);
 
 str = resource_str;
-count = fprintf(fid,str,[shidx,shidx,shidx]');
+count = fprintf(fid, str, [shidx, shidx, shidx].');
 
 str = resource_list_material_str;
-count = fprintf(fid,str,nface_vertex_data_unique);
+count = fprintf(fid, str, nface_vertex_data_unique);
 
 str = verbatim;
 %{
@@ -40,13 +41,13 @@ str = verbatim;
      }
 
 %}
-count = fprintf(fid,str,[shidx,shidx,face_vertex_data_unique]');
+count = fprintf(fid, str, [shidx, shidx, face_vertex_data_unique]');
 
 str = modifier_shading_str;
-count = fprintf(fid,str,nface_vertex_data_unique);
+count = fprintf(fid, str, nface_vertex_data_unique);
 
 str = shader_list_str;
-count = fprintf(fid,str,[shidx,shidx]');
+count = fprintf(fid, str, [shidx, shidx].');
 
 str = verbatim;
 %{

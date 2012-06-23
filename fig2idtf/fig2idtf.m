@@ -2,10 +2,12 @@ function [] = fig2idtf(filename,...
                         surf_vertices, faces, face_vertex_data,...
                         line_vertices, line_edges, line_colors,...
                         pointset_points, pointset_colors)
-%SAVE_IDTF   Save mesh in IDTF format.
+%FIG2IDTF   Save figure in IDTF format.
 %
 % usage
-%   SAVE_IDTF(filename, points, faces, face_vertex_data)
+%   FIG2IDTF(filename, surf_vertices, faces, face_vertex_data,...
+%                      line_vertices, line_edges, line_colors,...
+%                      pointset_points, pointset_colors)
 %
 % input
 %   filename = string of filename (including extension)
@@ -21,20 +23,28 @@ function [] = fig2idtf(filename,...
 %   face_vertex_data = RGB color data for points
 %                    = [#points x 3]
 %
-% See also FIG2U3D, U3D_PRE_SURFACE, U3D_PRE_LINE, U3D_PRE_QUIVERGROUP.
+% reference
+%   IDTF (Intermediate Data Text File) Format Description, Version 100,
+%   Intel Corporation, 2005, available at:
+%       http://u3d.svn.sourceforge.net/viewvc/u3d/releases/Gold12Update/Docs/IntermediateFormat/IDTF%20Format%20Description.pdf
+%
+% See also FIG2U3D, IDTF2U3D, FIG2PDF3D, U3D_PRE_SURFACE, U3D_PRE_LINE,
+%          U3D_PRE_QUIVERGROUP, U3D_PRE_CONTOURGROUP.
 %
 % File:      fig2idtf.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
 % Date:      2012.06.10 - 
 % Language:  MATLAB R2012a
 % Purpose:   preprocess lineseries children of axes for u3d export
-% Copyright: 
 %
-% Original Author: Alexandre Gramfort (2009-04-21)
-% Copyright (c)  Alexandre Gramfort. All rights reserved.
+% acknowledgment
+%   Based on save_idtf by Alexandre Gramfort.
+%   This can be found on the MATLAb Central File Exchange:
+%       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
+%   and is covered by the BSD License.
 
 % depends
-%   face_vertex_data_equals_npoints
+%   face_vertex_data_equals_npoints, check_file_extension
 
 if nargin < 4
     face_vertex_data = [];
@@ -42,27 +52,8 @@ end
 
 npoints = size(surf_vertices, 1);
 
-
-
-% if nface_vertex_data == npoints
-%     if 0
-%         face_vertex_data_mean = (face_vertex_data(faces(:,1),:)+face_vertex_data(faces(:,2),:)+ ...
-%                                 face_vertex_data(faces(:,3),:))/3;
-%         xx = face_vertex_data_mean - face_vertex_data(faces(:,1),:); xx = sum(xx.*xx,2);
-%         yy = face_vertex_data_mean - face_vertex_data(faces(:,2),:); yy = sum(yy.*yy,2);
-%         zz = face_vertex_data_mean - face_vertex_data(faces(:,3),:); zz = sum(zz.*zz,2);
-%         [tmp,I] = sort([xx,yy,zz],2);
-%         face_vertex_data = face_vertex_data(I(:,2),:);
-%         % [tmp,I] = min([xx,yy,zz],[],2);
-%         % face_vertex_data = face_vertex_data(I,:);
-%     else
-%         face_vertex_data = (face_vertex_data(faces(:,1),:)+face_vertex_data(faces(:,2),:)+ ...
-%                             face_vertex_data(faces(:,3),:))/3;
-%     end
-%     nface_vertex_data = nfaces;
-% end
-
-fid = fopen(filename, 'w');
+idtffile = check_file_extension(filename, '.idtf');
+fid = fopen(idtffile, 'w');
 
 disp('# of face vertex data == # points.')
     count = face_vertex_data_equals_npoints(fid,...

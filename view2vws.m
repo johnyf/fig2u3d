@@ -11,7 +11,7 @@ function [] = view2vws(ax, filename, part_renderers)
 % Copyright: Ioannis Filippidis, 2012-
 
 % depends
-%   axes_extremal_xyz, verbatim
+%   axes_extremal_xyz, verbatim, check_file_extension
 
 %% input
 if nargin < 1
@@ -21,8 +21,8 @@ end
 % filename and its extension ?
 if nargin < 2
     filename = 'matlab.vws';
-elseif isempty(strfind(filename, '.vws') )
-    filename = [filename, '.vws'];
+else
+    filename = check_file_extension(filename, '.vws');
 end
 matrix_mode = 0;
 viewname = 'MATLABfig';

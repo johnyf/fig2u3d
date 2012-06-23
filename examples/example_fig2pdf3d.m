@@ -1,7 +1,9 @@
 %% Mesh to pdf demo script
 % Generates a Latex file that can be used to generate a pdf embedded with a 3D mesh
-%
-% $Id: demo_mesh2pdf.m 3 2009-09-19 12:25:30Z agramfor $
+
+% Bashed on demo_mesh2pdf by Alexandre Gramfort
+
+
 
 %% Load sample data
 load demo_data/data_mesh2pdf.mat
