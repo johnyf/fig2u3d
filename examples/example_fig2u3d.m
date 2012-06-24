@@ -6,9 +6,41 @@ function [] = example_fig2u3d
 % Purpose:   examples for using fig2u3d
 % Copyright: Ioannis Filippidis, 2012-
 
-ax1 = newax;
+ax1 = gca;
 
-mixed_scene(ax1)
+peaks_facecolors(ax1)
+%peaks_sphere(ax1)
+%mixed_scene(ax1)
+
+copyfile('peaks.u3d', '..\tex\personal\3dheart\img\peaks.u3d')
+copyfile('peaks.vws', '..\tex\personal\3dheart\img\peaks.vws')
+
+function [] = peaks_facecolors(ax)
+[x, y, z] = peaks;
+[n, m] = size(x);
+c = 10 *rand(n-1, m-1);
+
+surf(ax, x, y, z +5, z +5)
+
+hold(ax, 'on')
+surf(ax, x, y, z, c)
+
+[x, y, z] = sphere;
+[n, m] = size(x);
+c = 10 *rand(n-1, m-1);
+surf(ax, x, y, z, c)
+
+fig2u3d(ax, 'peaks')
+
+function [] = peaks_sphere(ax)
+axes(ax)
+peaks
+hold(ax, 'on')
+sphere
+freezeColors
+plot_torus(ax, zeros(3, 1)+10, 1, 2, eye(3) )
+
+fig2u3d(ax, 'peaks')
 
 function [] = mixed_scene(ax)
 %% init

@@ -32,6 +32,3 @@ triplot(dt, 'Parent', newax)
 fig2u3d(ax, 'test')
 
 axis(ax, 'equal')
-
-copyfile('test.u3d', '..\tex\personal\3dheart\img\test.u3d')
-copyfile('test.vws', '..\tex\personal\3dheart\img\test.vws')

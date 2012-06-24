@@ -7,7 +7,7 @@ function [vertices, edges, line_colors] = create_marker_lines(h, type)
 % Copyright: Ioannis Filippidis, 2012-
 
 % depends
-%   get_line_xyz
+%   get_line_xyz, axes_extremal_xyz
 
 p = get_line_xyz(h);
 
@@ -41,16 +41,45 @@ switch type
 end
 disp(['      MarkerStyle = ', type] );
 
-dp = diff(p, 1, 2);
-d = vnorm(dp);
-r = min(d) /6;  % 1/6 minimal distance between consecutive points,
-                % used as marker size
+% line with single point only ?
+npoints = size(p, 2);
+if npoints == 1
+    % then we cannot take the minimum distance between line points....
+    r = marker_size_from_bounding_sphere(h);
+else
+    dp = diff(p, 1, 2);
+    d = vnorm(dp);
+    r = min(d) /6;  % 1/6 minimal distance between consecutive points,
+                    % used as marker size
+    
+    if r == 0
+        msg = ['Minimal distance between consecutive line points = 0.',...
+               'Tyring mean...'];
+        warning('markers:size', msg)
+        
+        r = mean(d) /6;
+    end
+    
+    if r == 0
+        msg = ['All line points are the same. Mean distance = 0.',...
+               'Using figure bounding sphere...'];
+        warning('markers:size', msg)
+        
+        r = marker_size_from_bounding_sphere(h);
+    end
+end
 [marker_vertices, marker_edges] = feval(type, r);
 [vertices, edges] = copy_marker_on_points(marker_vertices, marker_edges, p);
 
-n = size(p, 2);
 linecolor = {get(h, 'Color') };
-line_colors = repmat(linecolor, 1, n);
+line_colors = repmat(linecolor, 1, npoints);
+
+function [r] = marker_size_from_bounding_sphere(h)
+ax = get(h, 'Parent');
+xyz_minmax = axes_extremal_xyz(ax);
+v = xyz_minmax(2:2:end) -xyz_minmax(1:2:end);
+d = norm(v);
+r = d /100; % 1/100 world boounding sphere radius
 
 function [vertices, edges] = copy_marker_on_points(marker_vertices, marker_edges, p)
 n = size(p, 2);
@@ -72,6 +101,7 @@ end
 function [vertices, edges] = circle_marker(r)
 n = 10;
 t = linspace(0, 2*pi, n);
+
 vertices = r *[cos(t); sin(t) ];
 edges = [1:n; 2:n, 1] -1;
 

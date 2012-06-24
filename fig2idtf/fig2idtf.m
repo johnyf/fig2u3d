@@ -46,39 +46,10 @@ function [] = fig2idtf(filename,...
 % depends
 %   face_vertex_data_equals_npoints, check_file_extension
 
-idtffile = check_file_extension(filename, '.idtf');
-fid = fopen(idtffile, 'w');
-
-disp('# of face vertex data == # points.')
-count = face_vertex_data_equals_npoints(fid,...
+face_vertex_data_equals_npoints(filename,...
                                 surf_vertices, faces, face_vertex_data,...
                                 line_vertices, line_edges, line_colors,...
                                 pointset_points, pointset_colors);
-
-disp(['Number of lines written to IDTF file: ', num2str(count) ] )
-
-fclose(fid);
-
-%{
-npoints = size(points, 1);
-nfaces = size(faces, 1);
-
-if nargin < 4
-    face_vertex_data = [];
-end
-
-[fv1, fv2] = size(face_vertex_data);
-
-if ~isempty(face_vertex_data) && fv1 ~= npoints && fv1 ~= nfaces
-    error('Mesh colors should be of size nb points or nb of faces');
-end
-
-if fv2 == 1
-    % normally, this is indexed data !
-    face_vertex_data = repmat(face_vertex_data, 1, 3); % RGB colors
-end
-%}
-
 %{
 %% What is this ?
 if fv1 == npoints

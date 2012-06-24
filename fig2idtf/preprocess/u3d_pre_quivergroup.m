@@ -108,24 +108,15 @@ xh = get(head_handle, 'XData'); % 3 nan, 3 nan, ...
 yh = get(head_handle, 'YData');
 zh = get(head_handle, 'ZData');
 
-xb(isnan(xb) ) = [];
-yb(isnan(yb) ) = [];
-zb(isnan(zb) ) = [];
-
-xh(isnan(xh) ) = [];
-yh(isnan(yh) ) = [];
-zh(isnan(zh) ) = [];
-
-% 2d quiver ?
-if isempty(zb)
-    disp('2d quivergroup')
-    zb = zeros(size(xb) );
-    zh = zeros(size(xh) );
-end
+[xb, yb, zb, xh, yh, zh] = remove_nan_quivers(xb, yb, zb, xh, yh, zh);
 
 nb = size(xb, 2);
 nh = size(xh, 2);
 n = nb /2; % number of quiver vectors
+
+if (3*n) ~= nh
+    error('quiver:heads', 'Problem with the number of head points.')
+end
 
 disp(['Number of quiver vectors = ', num2str(n) ] )
 disp(['Number of body points = ', num2str(nb) ] )
@@ -142,6 +133,50 @@ vh = [xh; yh; zh];
 quiver_color = {get(h, 'Color') };
 m = size(vertices, 2);
 colors = repmat(quiver_color, 1, m);
+
+function [xb, yb, zb, xh, yh, zh] = remove_nan_quivers(xb, yb, zb, xh, yh, zh)
+xb(:, 3:3:end) = [];
+yb(:, 3:3:end) = [];
+zb(:, 3:3:end) = [];
+
+xh(:, 4:4:end) = [];
+yh(:, 4:4:end) = [];
+zh(:, 4:4:end) = [];
+
+% 2d quiver ?
+if isempty(zb)
+    disp('2d quivergroup')
+    zb = zeros(size(xb) );
+    zh = zeros(size(xh) );
+end
+
+xb_nanmask = coor_nanmask(xb, 2);
+yb_nanmask = coor_nanmask(yb, 2);
+zb_nanmask = coor_nanmask(zb, 2);
+
+xh_nanmask = coor_nanmask(xh, 3);
+yh_nanmask = coor_nanmask(yh, 3);
+zh_nanmask = coor_nanmask(zh, 3);
+
+nanmask = xb_nanmask | yb_nanmask | zb_nanmask | xh_nanmask | yh_nanmask | zh_nanmask;
+nanmask = ~nanmask;
+
+xb = apply_coor_mask(xb, nanmask, 2);
+yb = apply_coor_mask(yb, nanmask, 2);
+zb = apply_coor_mask(zb, nanmask, 2);
+
+xh = apply_coor_mask(xh, nanmask, 3);
+yh = apply_coor_mask(yh, nanmask, 3);
+zh = apply_coor_mask(zh, nanmask, 3);
+
+function [nanmask] = coor_nanmask(x, n)
+x = reshape(x, n, numel(x) /n);
+nanmask = any(isnan(x), 1);
+
+function [x] = apply_coor_mask(x, mask, n)
+x = reshape(x, n, numel(x) /n);
+x = x(:, mask);
+x = reshape(x, 1, numel(x) );
 
 function [vertices, lines] = chopped_quivergroup(vb, vh)
 vb = cut_line_to_pieces(vb, 2);

@@ -24,7 +24,7 @@ if nargin < 2
 else
     filename = check_file_extension(filename, '.vws');
 end
-matrix_mode = 0;
+matrix_mode = 0; % matrix mode not implemented yet
 viewname = 'MATLABfig';
 
 %% get view
@@ -55,6 +55,10 @@ if strcmp(projection, 'orthographic')
     
     orthographic_scaling_factor = 1 /d; % 3Dortho (scaling factor)
     radius_of_orbit = d /2; % 3Droo
+    
+    msg = ['Orthografic projection: Camera distance to target is different',...
+           'from figure. Computed based on the scene bounding sphere.'];
+    warning('view:export', msg)
 else
     orthographic_scaling_factor = 0;
 end

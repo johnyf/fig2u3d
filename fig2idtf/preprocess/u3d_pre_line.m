@@ -200,16 +200,23 @@ switch linestyle
 end
 
 function [vertices, edges, line_colors] = solid_line_prep(h, dashratio)
-v = get_line_xyz(h);
+lv = get_line_xyz(h); % line evrtices
 line_color = get(h, 'Color');
 
-%vertices = v;
-%npnt = size(vertices, 2);
+% single point only ?
+npoints = size(lv, 2);
+if npoints == 1
+    vertices = {};
+    edges = {};
+    line_colors = {};
+    return
+end
+
 %edges = [1:(npnt-1); 2:npnt]-1;
 
 %% temporary solution to reduces compression problems
 piece_size = 10;
-v = cut_line_to_pieces(v, piece_size);
+v = cut_line_to_pieces(lv, piece_size);
 
 n = size(v, 2);
 vertices = cell(1, n);

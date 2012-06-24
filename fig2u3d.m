@@ -139,6 +139,13 @@ end
 plot_axes(ax, addaxes)
 delete_idtf = 1; % delete intermediate IDTF file
 
+% nothing in the plot ?
+obj = get(ax, 'Children');
+if isempty(obj)
+    warning('axes:empty', 'Nothing in the plot. U3D file not exported.')
+    return
+end
+
 %% convert graphics objects to meshes, line_sets and point_sets
 [surf_vertices, faces, facevertexcdata, surf_renderers] = u3d_pre_surface(ax);
 [line_vertices, line_edges, line_colors,...
