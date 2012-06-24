@@ -79,46 +79,7 @@ for i=1:N
 end
 
 function [vertices, faces, facevertexcdata, renderer] = single_surf_preprocessor(h)
-% get defined data-points
-X = get(h, 'XData');
-Y = get(h, 'YData');
-Z = get(h, 'ZData');
-
-%{
-n = size(X, 1);
-m = size(X, 2);
-Vi = n *m; % number of vertices
-Fi = 2 *(n-1) *(m -1); % number of faces, due to wraping (closing of the surface)
-disp([num2str(j) ' Object Vertex # = ', num2str(Vi) ] )
-disp([num2str(j) ' Object Face # = ', num2str(Fi) ] )
-%}
-% scaled color to unscaled r
-cdata = get(h, 'CData');
-
-siz = size(cdata);
-cmap = colormap;
-nColors = size(cmap, 1);
-cax = caxis;
-idx = ceil( (double(cdata) -cax(1) ) / (cax(2) -cax(1) ) *nColors);
-idx(idx < 1) = 1;
-idx(idx > nColors) = nColors;
-%handle nans in idx
-nanmask = isnan(idx);
-idx(nanmask) = 1; %temporarily replace w/ a valid colormap index
-realcolor = zeros(siz);
-for i = 1:3,
-    c = cmap(idx, i);
-    c = reshape(c, siz);
-    realcolor(:, :, i) = c;
-end
-
-fvc = surf2patch(X, Y, Z, realcolor, 'triangles');
-
-vertices = fvc.vertices;
-faces = fvc.faces;
-facevertexcdata = fvc.facevertexcdata;
-
-% shading -> renderer in adobe reader
+%% shading -> renderer in adobe reader
 edgecolor = get(h, 'EdgeColor');
 if strcmp(edgecolor, 'none')
     renderer = 'Solid';
@@ -126,21 +87,101 @@ else
     renderer = 'SolidWireframe';
 end
 
+%% get defined data-points
+X = get(h, 'XData');
+Y = get(h, 'YData');
+Z = get(h, 'ZData');
+
+realcolor = get_surf_color(h);
+
+[faces, vertices, facevertexcdata] = surf2patch(X, Y, Z, realcolor, 'triangles');
+
+%% remove nan vertices and faces
+% remove faces using at least one vertex with some nan coordinate
+nan_vertices = any(isnan(vertices), 2);
+nan_faces = nan_vertices(faces);
+nan_faces = any(nan_faces, 2);
+nan_faces = ~nan_faces;
+faces = faces(nan_faces, :);
+
+% vertices with nan are not used anymore
+% just make them contain numbers
+% DO NOT REMOVE them! This would destroy face indexing
+vertices(isnan(vertices) ) = 0;
+
 %% surface concatenation (obsolete - although it reduces file size)
-%tempfvc.faces = tempfvc.faces +V; % shift to account for previous vertices
+%{
+[n, m] = size(X, 1);
+Vi = n *m; % number of vertices
+Fi = 2 *(n-1) *(m -1); % number of faces, due to wraping (closing of the surface)
+disp(['     Object Vertex # = ', num2str(Vi) ] )
+disp(['     Object Face # = ', num2str(Fi) ] )
+
+tempfvc.faces = tempfvc.faces +V; % shift to account for previous vertices
 
 % append to previous
-%fvc.vertices = [fvc.vertices; tempfvc.vertices];
-%fvc.faces = [fvc.faces; tempfvc.faces];
-%fvc.facevertexcdata = [fvc.facevertexcdata; tempfvc.facevertexcdata];
+fvc.vertices = [fvc.vertices; tempfvc.vertices];
+fvc.faces = [fvc.faces; tempfvc.faces];
+fvc.facevertexcdata = [fvc.facevertexcdata; tempfvc.facevertexcdata];
 
-%V = size(fvc.vertices, 1); %V = V +Vi;
+F = size(faces, 1);
+[C1, C2] = size(facevertexcdata);
 
-%{
-F = size(fvc.faces, 1);
-C1 = size(fvc.facevertexcdata, 1);
-C2 = size(fvc.facevertexcdata, 2);
-disp(['Vertex # = ', num2str(V) ] )
-disp(['Face # = ', num2str(F) ] )
-disp(['Vertex Colors = ', num2str(C1), ' x ', num2str(C2) ] )
+V = size(fvc.vertices, 1); %V = V +Vi;
+
+disp(['     Vertex # = ', num2str(V) ] )
+disp(['     Face # = ', num2str(F) ] )
+disp(['     Vertex Colors = ', num2str(C1), ' x ', num2str(C2) ] )
 %}
+
+function [realcolor] = get_surf_color(h)
+% texture mapping ?
+facecolor = get(h, 'FaceColor');
+if strcmp(facecolor, 'texturemap')
+    realcolor = [];
+    return
+end
+
+% texturemapping is when CData is an image and has different size than
+% XData and the number of faces, so it is not treated here yet.
+
+%% CData
+cdata = get(h, 'CData');
+[n, m, k] = size(cdata);
+
+% true color ?
+if k == 3
+    disp('CData is already True Color.')
+    cdata(isnan(cdata) ) = 1;
+    realcolor = cdata;
+    return
+end
+
+% not indexed colors ?
+if k ~= 1
+    error('u3dsurf:cdata', 'size(CData, 3) \notin {1, 3}')
+end
+
+%% indexed color to RGB true color
+cdata = double(cdata);
+
+cmap = colormap;
+nColors = size(cmap, 1);
+[cmin, cmax] = caxis;
+
+idx = (cdata -cmin) / (cmax -cmin) *nColors;
+idx = ceil(idx);
+idx(idx < 1) = 1;
+idx(idx > nColors) = nColors;
+
+%% handle nans in idx
+nanmask = isnan(idx);
+idx(nanmask) = 1; %temporarily replace w/ a valid colormap index
+
+%% realcolor and output
+realcolor = zeros(n, m);
+for i = 1:3
+    c = cmap(idx, i);
+    c = reshape(c, n, m);
+    realcolor(:, :, i) = c;
+end

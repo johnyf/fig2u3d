@@ -39,42 +39,65 @@ function [] = fig2idtf(filename,...
 %
 % acknowledgment
 %   Based on save_idtf by Alexandre Gramfort.
-%   This can be found on the MATLAb Central File Exchange:
+%   This can be found on the MATLAB Central File Exchange:
 %       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 %   and is covered by the BSD License.
 
 % depends
 %   face_vertex_data_equals_npoints, check_file_extension
 
-if nargin < 4
-    face_vertex_data = [];
-end
-
-npoints = size(surf_vertices, 1);
-
 idtffile = check_file_extension(filename, '.idtf');
 fid = fopen(idtffile, 'w');
 
 disp('# of face vertex data == # points.')
-    count = face_vertex_data_equals_npoints(fid,...
-                            surf_vertices, faces, face_vertex_data,...
-                            line_vertices, line_edges, line_colors,...
-                            pointset_points, pointset_colors);
-%{
-if isempty(face_vertex_data)
-    disp('No face vertex data provided.')
-    count = no_face_vertex_data(fid, faces, points, normals);
-elseif nface_vertex_data == npoints
-    disp('# of face vertex data == # points.')
-    count = face_vertex_data_equals_npoints(fid, faces, points,...
-                                            normals, face_vertex_data, line_points);
-else
-    disp('# of face vertex data ~= #points.')
-    count = face_vertex_data_unequal_npoints(fid, faces, points,...
-                                        normals, face_vertex_data);
-end
-%}
+count = face_vertex_data_equals_npoints(fid,...
+                                surf_vertices, faces, face_vertex_data,...
+                                line_vertices, line_edges, line_colors,...
+                                pointset_points, pointset_colors);
 
 disp(['Number of lines written to IDTF file: ', num2str(count) ] )
 
 fclose(fid);
+
+%{
+npoints = size(points, 1);
+nfaces = size(faces, 1);
+
+if nargin < 4
+    face_vertex_data = [];
+end
+
+[fv1, fv2] = size(face_vertex_data);
+
+if ~isempty(face_vertex_data) && fv1 ~= npoints && fv1 ~= nfaces
+    error('Mesh colors should be of size nb points or nb of faces');
+end
+
+if fv2 == 1
+    % normally, this is indexed data !
+    face_vertex_data = repmat(face_vertex_data, 1, 3); % RGB colors
+end
+%}
+
+%{
+%% What is this ?
+if fv1 == npoints
+    normals = mesh_normals(points, faces);
+    
+    t = [ones(3,3), -ones(3,3) ];
+    nt = max(normals*t, 0);
+    a = sum(nt, 2);
+    b = repmat(a, 1, 3);
+    b = b .*face_vertex_data;
+    
+    face_vertex_data = 0.7 *face_vertex_data +0.3 *b;
+    
+    face_vertex_data(face_vertex_data < 0) = 0;
+    face_vertex_data(face_vertex_data > 1) = 1;
+end
+
+% Hack to avoid to have too many colors to store
+face_vertex_data = fix(face_vertex_data*10) ./10;
+% face_vertex_data = fix(face_vertex_data*100)./100;
+points = points - repmat(mean(points), npoints, 1);
+%}

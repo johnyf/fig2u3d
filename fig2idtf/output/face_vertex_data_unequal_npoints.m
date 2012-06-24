@@ -1,86 +1,28 @@
-function [count] = face_vertex_data_unequal_npoints(fid, faces, points,...
-                                        normals, face_vertex_data)
-[face_vertex_data_unique, tmp, face_vertex_data_idx] = ...
+function [] = face_vertex_data_equals_nfaces(fid, faces, points,...
+                                             normals, face_vertex_data)
+[face_vertex_data_unique, ~, face_vertex_data_idx] = ...
                                 unique(face_vertex_data, 'rows');
 nface_vertex_data_unique = size(face_vertex_data_unique,1);
 
-str = node_resource_list_str;
-count = fprintf(fid, str, nfaces, npoints, npoints, nface_vertex_data_unique);
-
 idx = [0:(nfaces-1)].';
 shidx = [0:(nface_vertex_data_unique-1)].';
-str = shading_description_str;
-count = fprintf(fid, str, [shidx, shidx].');
 
-str = mesh_data_str;
-
-strfaces = sprintf('%d %d %d\n', faces.'-1);
-strpoints = sprintf('%f %f %f\n', points.');
-strnormals = sprintf('%f %f %f\n', normals');
+fprintf(fid, node_resource_list_str, nfaces, npoints, npoints, nface_vertex_data_unique);
+fprintf(fid, shading_description_str, [shidx, shidx].');
 % stridx = sprintf('%d\n',idx);
 str_face_vertex_data_idx = sprintf('%d\n', face_vertex_data_idx-1);
-count = fprintf(fid, str, strfaces, strfaces, str_face_vertex_data_idx,...
+fprintf(fid, mesh_data_str, strfaces, strfaces, str_face_vertex_data_idx,...
                 strpoints, strnormals, nface_vertex_data_unique);
-
-str = resource_str;
-count = fprintf(fid, str, [shidx, shidx, shidx].');
-
-str = resource_list_material_str;
-count = fprintf(fid, str, nface_vertex_data_unique);
-
-str = verbatim;
-%{
-     RESOURCE %d {
-          RESOURCE_NAME "Box01%d"
-          MATERIAL_AMBIENT 0 0 0
-          MATERIAL_DIFFUSE %f %f %f
-          MATERIAL_SPECULAR 0.2 0.2 0.2
-          MATERIAL_EMISSIVE 0 0 0
-          MATERIAL_REFLECTIVITY 0.100000
-          MATERIAL_OPACITY 1.000000
-     }
-
-%}
-count = fprintf(fid, str, [shidx, shidx, face_vertex_data_unique]');
-
-str = modifier_shading_str;
-count = fprintf(fid, str, nface_vertex_data_unique);
-
-str = shader_list_str;
-count = fprintf(fid, str, [shidx, shidx].');
-
-str = verbatim;
-%{
-          }
-     }
-}
-
-%}
-count = fprintf(fid,str);
+fprintf(fid, resource_str, [shidx, shidx, shidx].');
+fprintf(fid, resource_list_material_str, nface_vertex_data_unique);
+fprintf(fid, resource_material, [shidx, shidx, face_vertex_data_unique]');
+fprintf(fid, modifier_shading_str, nface_vertex_data_unique);
+fprintf(fid, shader_list_str, [shidx, shidx].');
+fprintf(fid, endstr);
 
 function [str] = node_resource_list_str
 str = verbatim;
 %{
-FILE_FORMAT "IDTF"
-FORMAT_VERSION 100
-
-NODE "MODEL" {
-     NODE_NAME "Mesh"
-     PARENT_LIST {
-          PARENT_COUNT 1
-          PARENT 0 {
-               PARENT_NAME "<NULL>"
-               PARENT_TM {
-                    1.000000 0.000000 0.000000 0.000000
-                    0.000000 1.000000 0.000000 0.000000
-                    0.000000 0.000000 1.000000 0.000000
-                    0.000000 0.000000 0.000000 1.000000
-               }
-          }
-     }
-     RESOURCE_NAME "MyMesh"
-}
-
 RESOURCE_LIST "MODEL" {
      RESOURCE_COUNT 1
      RESOURCE 0 {
@@ -180,5 +122,29 @@ str = verbatim;
                          SHADER 0 NAME: "Box01%d"
                     }
                }
+
+%}
+
+function [str] = resource_material
+str = verbatim;
+%{
+     RESOURCE %d {
+          RESOURCE_NAME "Box01%d"
+          MATERIAL_AMBIENT 0 0 0
+          MATERIAL_DIFFUSE %f %f %f
+          MATERIAL_SPECULAR 0.2 0.2 0.2
+          MATERIAL_EMISSIVE 0 0 0
+          MATERIAL_REFLECTIVITY 0.100000
+          MATERIAL_OPACITY 1.000000
+     }
+
+%}
+
+function [str] = endstr
+str = verbatim;
+%{
+          }
+     }
+}
 
 %}

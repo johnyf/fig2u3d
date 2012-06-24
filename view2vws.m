@@ -28,7 +28,7 @@ matrix_mode = 0;
 viewname = 'MATLABfig';
 
 %% get view
-camera_position = get(ax, 'CameraPosition');
+camera_position = get(ax, 'CameraPosition'); % = campos
 
 center_of_orbit = get(ax, 'CameraTarget'); % 3Dcoo
 center_of_orbit_2_camera_vector = camera_position -center_of_orbit; % 3Dc2c
@@ -41,7 +41,7 @@ curview = view(ax);
 T = curview(1:3, :); % reduced, 12-element matrix for Adobe PDF internals
 camera_2_world_transformation_matrix = T(:).'; % c2w
 
-camera_aperture_angle = get(ax, 'CameraViewAngle'); % 3Daac (degrees)
+camera_aperture_angle = get(ax, 'CameraViewAngle'); % 3Daac (degrees) = camva
 
 projection = get(ax, 'Projection');
 if strcmp(projection, 'orthographic')

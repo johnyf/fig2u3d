@@ -33,6 +33,12 @@ function [count] = face_vertex_data_equals_npoints(fid,...
 % Language:  MATLAB R2012a
 % Purpose:   export to u3d multiple surfaces, lines, quivergroups
 % Copyright: Ioannis Filippidis, 2012-
+%
+% acknowledgment
+%   Based on save_idtf by Alexandre Gramfort.
+%   This can be found on the MATLAB Central File Exchange:
+%       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
+%   and is covered by the BSD License.
 
 % depends
 %   verbatim, populate_mesh_resource_str, populate_line_resource_str,

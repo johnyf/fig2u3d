@@ -86,6 +86,10 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 % optional depends
 %   export_fig
 
+% known limitations
+%   surface texturemapping not exported
+%   filled contourplots not exported
+
 %% input
 if nargin < 1
     ax = gca;
