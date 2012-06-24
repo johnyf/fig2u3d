@@ -1,27 +1,30 @@
 function [] = fig2idtf(filename,...
-                        surf_vertices, faces, face_vertex_data,...
+                        surface_vertices, faces, face_vertex_data,...
                         line_vertices, line_edges, line_colors,...
                         pointset_points, pointset_colors)
 %FIG2IDTF   Save figure in IDTF format.
 %
 % usage
-%   FIG2IDTF(filename, surf_vertices, faces, face_vertex_data,...
-%                      line_vertices, line_edges, line_colors,...
-%                      pointset_points, pointset_colors)
+%   count = FIG2IDTF(fid, surface_vertices, faces, face_vertex_data,...
+%                         line_vertices, line_edges, line_colors,...
+%                         pointset_points, pointset_colors)
 %
 % input
 %   filename = string of filename (including extension)
-%   points = matrix of point coordinates
-%          = [#points x 3]
-%          = [x1, y1, z1;
-%             x2, y2, z2;
-%             ...
-%             xN, yN, zN]
-%   faces = matrix of point indices for each vertex of face triangle
-%          = [#triangles x 3]
-%          = [point1_index, point2_index, point3_index; ;;; ]
-%   face_vertex_data = RGB color data for points
-%                    = [#points x 3]
+%
+%   faces = {1 x #surfaces}
+%   surface_vertices = {1 x #surfaceplots}
+%   face_vertex_data = {1 x #surfaceplots}
+%
+%   line_vertices = {1 x #lineseries}
+%   line_lines = {1 x #lineseries}
+%   line_colors = {1 x #lineseries}
+%
+%   pointset_points = {1 x #pointsets}
+%   pointset_colors = {1 x #pointsets}
+%
+% output
+%   count = number of lines written to file with handle fid
 %
 % reference
 %   IDTF (Intermediate Data Text File) Format Description, Version 100,
@@ -33,9 +36,10 @@ function [] = fig2idtf(filename,...
 %
 % File:      fig2idtf.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
-% Date:      2012.06.10 - 
+% Date:      2012.06.10 - 2012.06.14
 % Language:  MATLAB R2012a
-% Purpose:   preprocess lineseries children of axes for u3d export
+% Purpose:   export to u3d multiple surfaces, lines, quivergroups
+% Copyright: Ioannis Filippidis, 2012-
 %
 % acknowledgment
 %   Based on save_idtf by Alexandre Gramfort.
@@ -44,31 +48,59 @@ function [] = fig2idtf(filename,...
 %   and is covered by the BSD License.
 
 % depends
-%   face_vertex_data_equals_npoints, check_file_extension
+%   verbatim, populate_mesh_resource_str, populate_line_resource_str,
+%   populate_point_resource_str, check_file_extension
 
-face_vertex_data_equals_npoints(filename,...
-                                surf_vertices, faces, face_vertex_data,...
-                                line_vertices, line_edges, line_colors,...
-                                pointset_points, pointset_colors);
+n_meshes = size(faces, 2);
+n_lines = size(line_vertices, 2);
+n_pointsets = size(pointset_points, 2);
+
+%% nodes
+nodes = idtf_model_nodes(n_meshes, n_lines, n_pointsets);
+
+%% resources
+mesh_resources = populate_mesh_resource_str(faces, surface_vertices, face_vertex_data);
+n_resources = n_meshes;
+line_resources = populate_line_resource_str(line_vertices, line_edges, line_colors, n_resources);
+n_resources = n_resources +n_lines;
+point_resources = populate_point_resource_str(pointset_points, pointset_colors, n_resources);
+
+mesh_line_resources = [mesh_resources, line_resources, point_resources];
+
+resource_list = resource_list_model_str;
+total_resource_number = n_meshes +n_lines +n_pointsets;
+resources = sprintf(resource_list, total_resource_number,...
+                             mesh_line_resources);
+
+%% final
+file_info = file_info_str;
+[shaders, materials, modifiers] = shaders_materials_modifiers(surface_vertices, faces, face_vertex_data);
+
+str = [file_info, nodes, resources, shaders, materials, modifiers];
+
+idtffile = check_file_extension(filename, '.idtf');
+fid = fopen(idtffile, 'w');
+count = fprintf(fid, str);
+fclose(fid);
+
+disp(['Number of lines written to IDTF file: ', num2str(count) ] )
+
+function [str] = file_info_str
+str = verbatim;
 %{
-%% What is this ?
-if fv1 == npoints
-    normals = mesh_normals(points, faces);
-    
-    t = [ones(3,3), -ones(3,3) ];
-    nt = max(normals*t, 0);
-    a = sum(nt, 2);
-    b = repmat(a, 1, 3);
-    b = b .*face_vertex_data;
-    
-    face_vertex_data = 0.7 *face_vertex_data +0.3 *b;
-    
-    face_vertex_data(face_vertex_data < 0) = 0;
-    face_vertex_data(face_vertex_data > 1) = 1;
-end
+FILE_FORMAT "IDTF"
+FORMAT_VERSION 100
 
-% Hack to avoid to have too many colors to store
-face_vertex_data = fix(face_vertex_data*10) ./10;
-% face_vertex_data = fix(face_vertex_data*100)./100;
-points = points - repmat(mean(points), npoints, 1);
+%}
+
+function [str] = resource_list_model_str
+% total_node_number, aggregate_string_of_resources
+str = verbatim;
+%{
+
+RESOURCE_LIST "MODEL" {
+     RESOURCE_COUNT %d
+     %s
+}
+
 %}

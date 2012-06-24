@@ -1,4 +1,10 @@
 function [shaders, materials, modifiers] = shaders_materials_modifiers(v, f, c)
+% File:      shaders_materials_modifiers.m
+% Author:    Ioannis Filippidis, jfilippidis@gmail.com
+% Date:      2012.06.24
+% Language:  MATLAB R2012a
+% Purpose:   mesh shaders, materials and modifiers
+% Copyright: Ioannis Filippidis, 2012-
 
 n_meshes = size(v, 2);
 n_shaders = 0;

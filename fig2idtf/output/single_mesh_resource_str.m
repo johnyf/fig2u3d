@@ -1,7 +1,7 @@
 function [mesh_resource] = single_mesh_resource_str(faces, points, face_vertex_data, i)
 % File:      single_mesh_resource_str.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
-% Date:      2012.06.10- 2012.06.24
+% Date:      2012.06.10 - 2012.06.24
 % Language:  MATLAB R2012a
 % Purpose:   export single mesh to idtf
 % Copyright: Ioannis Filippidis, 2012-
