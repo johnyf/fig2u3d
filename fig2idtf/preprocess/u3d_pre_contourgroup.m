@@ -1,4 +1,33 @@
 function [vertices, edges, colors] = u3d_pre_contourgroup(ax)
+%U3D_PRE_CONTOURGROUP   Preprocess contour output to u3d.
+%
+% usage
+%   [vertices, edges, colors] = U3D_PRE_CONTOURGROUP
+%   [vertices, edges, colors] = U3D_PRE_CONTOURGROUP(ax)
+%
+% input
+%   ax = axes object handle
+%
+% output
+%   vertices = position vectors as columns of matrix,
+%              as row cell array for multiple quivergroups
+%          = {1 x quivergroups}
+%          = {[3 x #points], ... }
+%   edges = line connections between vertices,
+%           index in "vertices" of each line's
+%           start and end vertices ,
+%           as row cell array for multiple quivergroups
+%         = {1 x #quivergroups}
+%         = {[2 x #lines], ...}
+%           where: [2 x #lines] = [start_index1, ...;
+%                                  end_index1, ...];
+%   colors = RGB colors of quivergroups
+%          = {1 x #quivergroups}
+%          = {[r, g, b], [r, g, b], ... }
+%
+% See also fig2idtf, u3d_pre_line, u3d_pre_surface, u3d_pre_patch,
+%          u3d_pre_quivergroup.
+%
 % File:      u3d_pre_contourgroup.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
 % Date:      2012.06.15 - 
@@ -7,6 +36,7 @@ function [vertices, edges, colors] = u3d_pre_contourgroup(ax)
 % Copyright: Ioannis Filippidis, 2012-
 
 % todo
+%   cut contourlines into pieces
 %   filled contourgroups
 
 %% input
@@ -68,7 +98,8 @@ function [vertices, edges, colors] = single_contour_preprocessor(h)
 % filled ?
 f = get(h, 'Fill');
 if strcmp(f, 'on')
-    warning('contour:u3d_pre', 'Filled contourgoup not yet implemented.')
+    msg = 'Skipping exporting object: Filled contourgoup to be implemented soon.';
+    warning('contour:u3d_pre', msg)
     vertices = {};
     edges = {};
     colors = {};
@@ -76,6 +107,7 @@ if strcmp(f, 'on')
 end
 
 hc = get(h, 'Children');
+ax = get(h, 'Parent');
 
 for i=1:length(hc)
     curhc = hc(i, 1);
@@ -84,17 +116,17 @@ for i=1:length(hc)
     v = get(curhc, 'Vertices').';
     n = size(v, 2) -1;
     v = v(:, 1:n); % get rid of the nans
-    v = [v; zeros(1, n) ];
+    v(3, :) = zeros(1, n); % 3rd coordinate
     
-    e = [1:n; 2:n, 1] -1;
+    e = [1:(n-1); 2:n] -1;
     
     %facevertexcdata = get(h, 'FaceVertexCData');
 
     cdata = get(curhc, 'CData');
     siz = size(cdata);
-    cmap = colormap;
+    cmap = colormap(ax);
     nColors = size(cmap, 1);
-    cax = caxis;
+    cax = caxis(ax);
     idx = ceil( (double(cdata) -cax(1) ) / (cax(2) -cax(1) ) *nColors);
     idx(idx < 1) = 1;
     idx(idx > nColors) = nColors;

@@ -8,12 +8,13 @@ function [] = example_fig2u3d
 
 ax1 = gca;
 
-peaks_facecolors(ax1)
+%peaks_facecolors(ax1)
 %peaks_sphere(ax1)
-%mixed_scene(ax1)
+mixed_scene(ax1)
+%peaks_contour(ax1)
 
-copyfile('peaks.u3d', '..\tex\personal\3dheart\img\peaks.u3d')
-copyfile('peaks.vws', '..\tex\personal\3dheart\img\peaks.vws')
+%copyfile('peaks.u3d', '..\tex\personal\3dheart\img\peaks.u3d')
+%copyfile('peaks.vws', '..\tex\personal\3dheart\img\peaks.vws')
 
 function [] = peaks_facecolors(ax)
 [x, y, z] = peaks;
@@ -66,4 +67,14 @@ axis(ax, 'equal')
 axis(ax, 'tight')
 view(ax, 3)
 
-%fig2u3d(ax, 'mixed_scene')
+fig2u3d(ax, 'mixed_scene')
+
+function [] = peaks_contour(ax)
+if nargin < 1
+    ax = newax;
+end
+
+[X, Y, Z] = peaks;
+surf(ax, X, Y, Z+3)
+hold(ax, 'on')
+contour(ax, X, Y, Z)

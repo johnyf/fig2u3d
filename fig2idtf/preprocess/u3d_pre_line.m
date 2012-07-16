@@ -14,7 +14,8 @@ function [vertices, edges, colors, points, point_colors] = u3d_pre_line(ax)
 %          = {1 x #lines}
 %          = {[3 x #points], ... }
 %
-% See also FIG2IDTF, U3D_PRE_SURFACE, U3D_PRE_QUIVERGROUP.
+% See also fig2idtf, u3d_pre_surface, u3d_pre_patch, u3d_pre_quivergroup,
+%          u3d_pre_contourgroup.
 %
 % File:      u3d_pre_line.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
@@ -74,6 +75,7 @@ for i=1:N
     
         k = k +n;
     end
+    disp(['         used: ', num2str(n), ' LineSets for LineStyle.'] )
     
     [curvertices, curedges, curcolor, curpoints, curpoint_colors] = marker_prep(h);
     
@@ -88,6 +90,7 @@ for i=1:N
 
         k = k +n;
     end
+    disp(['         used: ', num2str(n), ' LineSets for MarkerStyle.'] )
     
     % add pointsets due to linesets and markers
     n = size(curpoints, 2);
@@ -99,6 +102,10 @@ for i=1:N
 
         m = m +n;
     end
+    disp(['         used: ', num2str(n), ' PointSets for MarkerStyle.'] )
+    
+    disp(['         cumulative at: ', num2str(k), ' LineSets.'] )
+    disp(['         cumulative at: ', num2str(m), ' PointSets.'] )
     
     %vertices{1, i} = curvertices;
     %edges{1, i} = curedges;
@@ -135,7 +142,7 @@ end
 markerstyle = get(h, 'Marker');
 switch markerstyle
     case 'none'
-        disp('This line has: Marker = ''none''.')
+        disp('         This line has: Marker = ''none''.')
     case '.'
         % . = point
         % marker producing pointset
@@ -178,10 +185,10 @@ end
 function [vertices, edges, line_colors] = line_prep(h)
 % no line visible ?
 linestyle = get(h, 'LineStyle');
-disp(['This line has: LineStyle = ''', linestyle, '''.'] )
+disp(['         This line has: LineStyle = ''', linestyle, '''.'] )
 switch linestyle
     case {'none', '.', ':'}
-        disp('No line for this lineseries exported to u3d.')
+        disp('      No line for this lineseries exported to u3d.')
         vertices = {};
         edges = {};
         line_colors = {};

@@ -13,7 +13,7 @@ n_materials = 0;
 material_resources = cell(1, n_meshes);
 modifiers = cell(1, n_meshes);
 for i=1:n_meshes
-    vertices = v{1, i};
+    vertices = v{1, i}.';
     faces = f{1, i};
     face_vertex_data = c{1, i};
     
@@ -114,7 +114,7 @@ function [str] = material_resource_str(use_vertex_color)
 % resource_id, box_id, material_diffuse_colors(3)
 
 if use_vertex_color
-    str = verbatim;
+    str = verbatim; %use for alpha: MATERIAL_OPACITY 0.500000
 %{
      RESOURCE %d {
           RESOURCE_NAME "Box01%d"
@@ -123,7 +123,7 @@ if use_vertex_color
           MATERIAL_SPECULAR 0.0 0.0 0.0
           MATERIAL_EMISSIVE 1.0 1.0 1.0
           MATERIAL_REFLECTIVITY 0.500000
-          MATERIAL_OPACITY 0.500000
+          MATERIAL_OPACITY 1.0
      }
 
 %}

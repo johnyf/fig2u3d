@@ -1,4 +1,11 @@
-%function [] = draw_crystal_lattice
+function [] = draw_crystal_lattice
+% File:      draw_crystal_lattice.m
+% Author:    Ioannis Filippidis, jfilippidis@gmail.com
+% Date:      2011.01.30 - 
+% Language:  MATLAB R2012a
+% Purpose:   draw crystal lattices
+% Copyright: Ioannis Filippidis, 2011-
+
 selection = 'diamond'; % 'diamond', 'copper'
 
 a = 1;
@@ -92,17 +99,18 @@ switch selection
         disp('Unknown material selection.')
 end
 
-hold on
+ax = newax;
+hold(ax, 'on')
 for i=1:size(r, 2)
     h = drawSphere(r(:, i), 0.05);
     set(h, 'FaceColor', 'r')
 end
-axis tight
-grid on
-box on
-axis equal
-view(3)
-maximize
+grid(ax, 'on')
+box(ax, 'on')
+axis(ax, 'equal')
+axis(ax, 'tight')
+view(ax, 3)
+%maximize(get(ax, 'Parent') )
 
 for i=1:size(i1, 1)
     a = i1(i, 1);
@@ -111,4 +119,4 @@ for i=1:size(i1, 1)
 end
 
 fname = selection;
-fig2u3d(gca, fname);
+fig2u3d(gca, fname, '-pdf');

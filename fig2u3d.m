@@ -40,9 +40,10 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 %   addaxes = show axes in u3d file (default = 0)
 %           = 0 | 1 (do not show/ show, respectively)
 %             (depending on which one is available and used).
-%   varargin = additional options for exporting 2D image using either print
-%              or export_fig. These must conform to the inputs accepted by
-%              the export function used.
+%   varargin = additional options to be passed to print or export_fig
+%              functions, depending on which one is used for saving the 
+%              2D image for PDF viewers without 3D support. These must
+%              conform to the inputs accepted by the export function used.
 %
 % output
 %   This M-function does not return any data.
@@ -50,12 +51,18 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 %
 % examples
 %   peaks
-%   FIG2U3D(gca, 'peaks', 0, 1, '-dpdf') % if using print
-%   FIG2U3D(gca, 'peaks', 0, 1, 1, '-dpng', '-r300') % if using print
+%   FIG2U3D(gca, 'peaks', '-dpdf') % if using print
+%   FIG2U3D(gca, 'peaks', '-dpng', 0, '-r300') % if using print
 %
-%   FIG2U3D(gca, 'peaks', 0, 1, 1, '-pdf') % if using export_fig
-%   FIG2U3D(gca, 'peaks', 0, 1, 1, '-png') % if using export_fig
+%   FIG2U3D(gca, 'peaks', '-pdf') % if using export_fig
+%   FIG2U3D(gca, 'peaks', '-png') % if using export_fig
 %   
+% remark
+%   When the axes are unequal, the exporter maintains the aspect ratio by
+%   changing the exported coordinates to achieve the same view as in the
+%   MATLAB plot window. To avoid this, edit the "fix_daspect = 1;" line in
+%   fig2u3d to "fix_daspect = 0;".
+%
 % optional dependency
 %   export_fig, for saving an accompanying 2D image to substitute the 3D
 %   inetractive figure in PDF readers which do not render it.
@@ -121,6 +128,8 @@ end
 % filename provided ?
 if nargin < 2
     fname = 'surface';
+elseif ~ischar(fname) || isempty(fname)
+    fname = 'surface';
 end
 
 % save image substitute ?
@@ -129,11 +138,19 @@ if nargin < 3
     imgtype = '-png';
 elseif strcmp(imgtype, 'none') || isempty(imgtype)
     saveimg = 0;
+elseif ~ischar(imgtype)
+    imgtype = '-png';
+else
+    imgtype = '-pdf';
 end
 
 % show axes ?
 if nargin < 4
     addaxes = 0;
+elseif isempty(addaxes)
+    addaxes = 0;
+elseif (addaxes ~= 1) && (addaxes ~= 0)
+    error('fig2u3d:addaxes', 'Argument "addaxes" can be 0 or 1.')
 end
 
 plot_axes(ax, addaxes)
@@ -146,18 +163,30 @@ if isempty(obj)
     return
 end
 
+% are the axes equal ?
+dar = daspect(ax);
+dar = dar /dar(1);
+if any(dar ~= 1)
+    msg = 'Axis aspect ratio unequal. Exported U3D will look different.';
+    warning('axes:aspect', msg)
+end
+
+fix_daspect = 1; % when axes are unequal, change aspect ratio of exported
+                 % graphics, so that the exported figure has the same view
+
 %% convert graphics objects to meshes, line_sets and point_sets
-[surf_vertices, faces, facevertexcdata, surf_renderers] = u3d_pre_surface(ax);
+[surf_vertices, surf_faces, surf_facevertexcdata, surf_renderers] = u3d_pre_surface(ax);
+[patch_vertices, patch_faces, patch_facevertexcdata, patch_renderers] = u3d_pre_patch(ax);
 [line_vertices, line_edges, line_colors,...
- line_points, line_point_colors] = u3d_pre_line(ax);
+                line_points, line_point_colors] = u3d_pre_line(ax);
 [quiver_vertices, quiver_edges, quiver_colors] = u3d_pre_quivergroup(ax);
 [contour_vertices, contour_edges, contour_colors] = u3d_pre_contourgroup(ax);
 
 %% group meshes, line_sets and point_sets
 % aggregate meshes
-mesh_vertices = surf_vertices;
-mesh_faces = faces;
-mesh_colors = facevertexcdata;
+mesh_vertices = [surf_vertices, patch_vertices];
+mesh_faces = [surf_faces, patch_faces];
+mesh_colors = [surf_facevertexcdata, patch_facevertexcdata];
 
 % aggregate lines
 line_vertices = [line_vertices, quiver_vertices, contour_vertices];
@@ -168,6 +197,22 @@ line_colors = [line_colors, quiver_colors, contour_colors];
 pointset_points = line_points;
 pointset_colors = line_point_colors;
 
+%% fix axis aspect ratio
+if fix_daspect == 1
+    dar = daspect(ax);
+    
+    if ~isequal(dar, ones(1, 3) )
+        msg = ['Unequal axes data aspect ratio, to be fixed by ',...
+               'scaling the axes. To change this behavior, edit ',...
+               '"fix_daspect = 1;" in fig2u3d to "fix_daspect = 0;"'];
+        warning('fig2u3d:daspect', msg)
+    end
+    
+    mesh_vertices = axis_rescale(mesh_vertices, dar);
+    line_vertices = axis_rescale(line_vertices, dar);
+    pointset_points = axis_rescale(pointset_points, dar);
+end
+
 %% export
 fig2idtf(fname,...
           mesh_vertices, mesh_faces, mesh_colors,...
@@ -177,8 +222,8 @@ fig2idtf(fname,...
 idtf2u3d(fname)
 rm_idtf(fname, delete_idtf)
 
-part_renderers = surf_renderers;
-view2vws(ax, fname, part_renderers)
+part_renderers = [surf_renderers, patch_renderers];
+view2vws(ax, fname, part_renderers, fix_daspect)
 
 save_png_substitute(ax, fname, saveimg, imgtype, varargin{:} )
 
@@ -224,7 +269,7 @@ end
 % export_fig available ?
 fighandle = get(ax, 'Parent');
 if exist('export_fig', 'file') == 2
-    col = get(fighandle, 'Color'); % get color
+    col = get(fighandle, 'Color'); % current fig background color
     
     % set white background for png ?
     if strcmp(imgtype, '-png')
@@ -237,3 +282,15 @@ if exist('export_fig', 'file') == 2
 else
     print(fighandle, imgtype, varargin{:}, fname)
 end
+
+function [a] = axis_rescale(a, dar)
+if isempty(a)
+   return
+end
+
+a = cellfun(@(x) cell_divider(x, dar), a, 'UniformOutput', false);
+
+function [x] = cell_divider(x, dar)
+x = [x(1, :)/dar(1);
+     x(2, :)/dar(2);
+     x(3, :)/dar(3) ];

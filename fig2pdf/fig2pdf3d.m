@@ -6,7 +6,7 @@ function [] = fig2pdf3d(ax, filename, media9_or_movie15, pdforxelatex)
 %
 % input
 %   ax = axes object handle
-%   filename = file name string
+%   filename = file name string (default = 'surface')
 %   media9_or_movie15 = use media9 or movie15 LaTeX packages
 %                     = 'media9' | 'movie15' (default = 'media9')
 %
@@ -34,7 +34,7 @@ end
 
 % Set the output Latex filename
 if nargin < 2
-    filename = 'mesh';
+    filename = 'surface';
 end
 
 % which package to use ?

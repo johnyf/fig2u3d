@@ -25,7 +25,8 @@ function [vertices, edges, colors] = u3d_pre_quivergroup(ax)
 %          = {1 x #quivergroups}
 %          = {[r, g, b], [r, g, b], ... }
 %
-% See also FIG2IDTF, U3D_PRE_LINE, U3D_PRE_SURFACE.
+% See also fig2idtf, u3d_pre_line, u3d_pre_surface, u3d_pre_patch,
+%          u3d_pre_contourgroup.
 %
 % File:      u3d_pre_quivergroup.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
@@ -33,6 +34,9 @@ function [vertices, edges, colors] = u3d_pre_quivergroup(ax)
 % Language:  MATLAB R2012a
 % Purpose:   preprocess quivergroup children of axes for u3d export
 % Copyright: Ioannis Filippidis, 2012-
+
+% depends
+%   cut_line_to_pieces
 
 % todo
 %   replace body tip point with head tip point,

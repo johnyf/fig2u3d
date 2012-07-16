@@ -1,4 +1,7 @@
 function [mesh_resource] = single_mesh_resource_str(faces, points, face_vertex_data, i)
+%
+% See also u3d_pre_patch.
+%
 % File:      single_mesh_resource_str.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
 % Date:      2012.06.10 - 2012.06.24
@@ -11,6 +14,8 @@ function [mesh_resource] = single_mesh_resource_str(faces, points, face_vertex_d
 %   This can be found on the MATLAB Central File Exchange:
 %       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 %   and is covered by the BSD License.
+
+points = points.';
 
 nfaces = size(faces, 1);
 npoints = size(points, 1);
@@ -31,7 +36,10 @@ switch nface_vertex_data
     case nfaces
         disp('size(cdata, 1) = #faces')
     otherwise
-        error('#colors ~= #points, #faces and not empty.')
+        disp(['#colors = ', num2str(nface_vertex_data) ] )
+        disp(['#points = ', num2str(npoints) ] )
+        disp(['#faces = ', num2str(nfaces) ] )
+        error('#colors ~= #points and #colors ~= #faces and #colors not empty.')
 end
 
 %% colors
@@ -42,6 +50,7 @@ strfaces = sprintf('                    %d %d %d\n', faces.'-1);
 strpoints = sprintf('                    %f %f %f\n', points.');
 
 normals = mesh_normals(points, faces);
+normals(isnan(normals) ) = 0;
 strnormals = sprintf('                    %f %f %f\n', normals.');
 
 % model diffuse color and shading counts

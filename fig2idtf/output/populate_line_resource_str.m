@@ -36,7 +36,8 @@ nlines = size(edges, 2);
 % at least one line ?
 % (needs 2 vertices)
 if nlines < 1
-    error('idtf:line', 'No edges for this Lineset.')
+    msg = ['No edges for this Lineset (id = ', num2str(line_number), ' )'];
+    error('idtf:line', msg)
 end
 
 line_position_list = edges;

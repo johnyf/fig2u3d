@@ -29,7 +29,8 @@ function [vertices, faces, facevertexcdata, renderer] = u3d_pre_surface(ax)
 %                   = {1 x #surfaces}
 %                   = {[#vertices x 3], ... }
 %
-% See also FIG2IDTF, U3D_PRE_LINE, U3D_PRE_QUIVERGROUP.
+% See also fig2idtf, u3d_pre_line, u3d_pre_patch, u3d_pre_quivergroup,
+%          u3d_pre_contourgroup.
 %
 % File:      u3d_pre_surface.m
 % Original Author: Sven Koerner, koerner(underline)sven(add)gmx.de
@@ -108,6 +109,7 @@ faces = faces(nan_faces, :);
 % just make them contain numbers
 % DO NOT REMOVE them! This would destroy face indexing
 vertices(isnan(vertices) ) = 0;
+vertices = vertices.';
 
 %% surface concatenation (obsolete - although it reduces file size)
 %{
@@ -147,7 +149,7 @@ end
 
 %% CData
 cdata = get(h, 'CData');
-[n, m, k] = size(cdata);
+k = size(cdata, 3);
 
 % true color ?
 if k == 3
@@ -163,11 +165,16 @@ if k ~= 1
 end
 
 %% indexed color to RGB true color
+ax = get(h, 'Parent');
+realcolor = scaled_ind2rgb(cdata, ax);
+
+function [realcolor] = scaled_ind2rgb(cdata, ax)
+[n, m] = size(cdata);
 cdata = double(cdata);
 
-cmap = colormap;
+cmap = colormap(ax);
 nColors = size(cmap, 1);
-[cmin, cmax] = caxis;
+[cmin, cmax] = caxis(ax);
 
 idx = (cdata -cmin) / (cmax -cmin) *nColors;
 idx = ceil(idx);
