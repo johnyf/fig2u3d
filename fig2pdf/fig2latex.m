@@ -15,6 +15,9 @@ function [] = fig2latex(ax, fname, media9_or_movie15, pdforxelatex)
 % output
 %   Saves a U3D file and the LaTeX which includes it.
 %
+% remark
+%   The movie15 LaTeX package implements only perspective projection
+%
 % See also FIG2PDF3D, U3D_IN_LATEX.
 %
 % File:      fig2latex.m
@@ -29,8 +32,22 @@ function [] = fig2latex(ax, fname, media9_or_movie15, pdforxelatex)
 %       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 %   and is covered by the BSD License.
 
-imgfname = [fname, '2d'];
-fig2u3d(ax, imgfname)
+% depends
+%   fig2u3d, u3d_in_latex, clear_file_extension, check_file_extension
+
+% change to perspective projection for movie15 ?
+if strcmp(media9_or_movie15, 'movie15')
+    msg = 'The movie15 LaTeX package only uses Perspective projection.';
+    warning('movie15:proj', msg)
+    disp('      Changing to ''Projection'' = ''perspective'' ');
+    curproj = get(ax, 'Projection');
+    set(ax, 'Projection', 'perspective')
+    fig2u3d(ax, fname)
+    set(ax, 'Projection', curproj)
+else
+    fig2u3d(ax, fname)
+end
+
 u3d_in_latex(fname, media9_or_movie15)
 
 fname = clear_file_extension(fname, '.tex');
@@ -64,7 +81,7 @@ function [str] = latex_content
 % packages needed by xelatex = string
 str = verbatim;
 %{
-\\usepackage{graphicx}
+\\usepackage{graphicx}%%
 \\begin{document}
     \\input{%s_small}%%
 \\end{document}
@@ -86,4 +103,9 @@ else
 end
 
 function [str] = movie15
-str = '\\usepackage[3D]{movie15}\n';
+str = verbatim;
+%{
+\\usepackage{hyperref}%%
+\\usepackage[3D]{movie15}%%
+
+%}

@@ -48,8 +48,9 @@ function [] = fig2idtf(filename,...
 %   and is covered by the BSD License.
 
 % depends
-%   verbatim, populate_mesh_resource_str, populate_line_resource_str,
-%   populate_point_resource_str, check_file_extension
+%   idtf_model_nodes, populate_mesh_resource_str,
+%   populate_line_resource_str, populate_point_resource_str,
+%   shaders_materials_modifiers, check_file_extension, verbatim
 
 n_meshes = size(faces, 2);
 n_lines = size(line_vertices, 2);

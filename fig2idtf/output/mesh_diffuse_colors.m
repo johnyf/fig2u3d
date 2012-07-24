@@ -13,6 +13,9 @@ function [strmodelshading, strfaces_colors, strfaceshading, strcolors,...
 %       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 %   and is covered by the BSD License.
 
+% depends
+%   verbatim
+
 %% no colors
 if isempty(face_vertex_data)
     strmodelshading = sprintf(shading_description_str, [0, 0].');

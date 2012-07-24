@@ -15,6 +15,9 @@ function [mesh_resource] = single_mesh_resource_str(faces, points, face_vertex_d
 %       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 %   and is covered by the BSD License.
 
+% depends
+%   mesh_diffuse_colors, mesh_normals, verbatim
+
 points = points.';
 
 nfaces = size(faces, 1);

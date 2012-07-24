@@ -6,6 +6,9 @@ function [shaders, materials, modifiers] = shaders_materials_modifiers(v, f, c)
 % Purpose:   mesh shaders, materials and modifiers
 % Copyright: Ioannis Filippidis, 2012-
 
+% depends
+%   verbatim
+
 n_meshes = size(v, 2);
 n_shaders = 0;
 shader_resources = cell(1, n_meshes);

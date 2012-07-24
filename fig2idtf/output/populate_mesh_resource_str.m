@@ -16,7 +16,7 @@ function [mesh_resources] = populate_mesh_resource_str(f, v, c)
 %   and is covered by the BSD License.
 
 % depends
-%   mesh_normals, verbatim
+%   single_mesh_resource_str
 
 n_meshes = size(f, 2);
 tmp_mesh_resources = cell(1, n_meshes);

@@ -42,10 +42,10 @@ function [vertices, faces, facevertexcdata, renderer] = u3d_pre_patch(ax)
 
 %% input
 if nargin < 1
-    sh = findobj('type', 'patch');
+    sh = findobj('flat', 'type', 'patch');
 else
     objs = get(ax, 'Children');
-    sh = findobj(objs, 'type', 'patch');
+    sh = findobj(objs, 'flat', 'type', 'patch');
 end
 
 if isempty(sh)
@@ -88,6 +88,11 @@ end
 faces = get(h, 'Faces');
 vertices = get(h, 'Vertices');
 facevertexcdata = get(h, 'FaceVertexCData');
+
+% triangulation needed ?
+if size(faces, 2) > 3
+    faces = delaunay_triangulate_patch_face(faces, vertices);
+end
 
 %% remove nan vertices and faces
 % remove faces using at least one vertex with some nan coordinate
@@ -145,3 +150,38 @@ idx(nanmask) = 1; %temporarily replace w/ a valid colormap index
 
 %% realcolor and output
 realcolor = cmap(idx, :);
+
+function [f] = delaunay_triangulate_patch_face(faces, vertices)
+warning('patch:faces', 'Patch faces are not triangulated.')
+disp('      Using Delanay triangulation.')
+
+% for each face
+n = size(faces, 1);
+f = cell(n, 1);
+for i=1:n
+    curface = faces(i, :);
+
+    % clear NaN due to face with smaller number of vertices
+    curface = curface(~isnan(curface) );
+
+    cur_pntnum = size(curface, 2);
+
+    % triangle after NaN removal ?
+    if cur_pntnum == 3
+        f(i, 1) = curface;
+        continue
+    end
+
+    % project on polygon's plane and Delaunay triangulate
+    xabs = vertices(curface, :).';
+    xref = xabs(:, 1);
+    xrel = bsxfun(@minus, xabs, xref);
+    base = xrel(:, 2:3); % 1 is the zero vector
+    orth_base = orth(base);
+    A = orth_base.';
+    xproj = A *xrel;
+    curtrifaces = delaunay(xproj.');
+    
+    f{i, 1} = curface(curtrifaces);
+end
+f = cell2mat(f);

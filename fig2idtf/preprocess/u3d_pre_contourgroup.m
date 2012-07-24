@@ -35,8 +35,10 @@ function [vertices, edges, colors] = u3d_pre_contourgroup(ax)
 % Purpose:   preprocess contourgroup children of axes for u3d export
 % Copyright: Ioannis Filippidis, 2012-
 
+% depends
+%   line_pieces
+
 % todo
-%   cut contourlines into pieces
 %   filled contourgroups
 
 %% input
@@ -109,41 +111,73 @@ end
 hc = get(h, 'Children');
 ax = get(h, 'Parent');
 
+% for each contour line in this contourgroup
+k = 0;
 for i=1:length(hc)
     curhc = hc(i, 1);
     
-    % LineColor
+    %% vertices
     v = get(curhc, 'Vertices').';
     n = size(v, 2) -1;
     v = v(:, 1:n); % get rid of the nans
     v(3, :) = zeros(1, n); % 3rd coordinate
     
-    e = [1:(n-1); 2:n] -1;
-    
-    %facevertexcdata = get(h, 'FaceVertexCData');
+    %% temporary solution to reduces compression problems after idtf2u3d.exe
+    piece_size = 10;
+    [curv, cure] = line_pieces(v, piece_size, 0);
+    %e = [1:(n-1); 2:n] -1;
 
-    cdata = get(curhc, 'CData');
-    siz = size(cdata);
+    %% colors
     cmap = colormap(ax);
     nColors = size(cmap, 1);
-    cax = caxis(ax);
-    idx = ceil( (double(cdata) -cax(1) ) / (cax(2) -cax(1) ) *nColors);
-    idx(idx < 1) = 1;
-    idx(idx > nColors) = nColors;
-    %handle nans in idx
-    nanmask = isnan(idx);
-    idx(nanmask) = 1; %temporarily replace w/ a valid colormap index
-    realcolor = zeros(siz);
-    for j = 1:3,
-        c = cmap(idx, j);
-        c = reshape(c, siz);
-        realcolor(:, :, j) = c;
-    end
+    cdatamapping = get(curhc, 'CDataMapping');
+    switch cdatamapping
+        case 'direct'
+            % directly indexed color data
+            idx = get(curhc, 'CData');
+            
+            % fix end colors
+            idx(idx < 1) = 1;
+            idx(nColors < idx) = nColors;
 
-    vertices{1, i} = v;
-    edges{1, i} = e;
-    colors{1, i} = squeeze(realcolor(1, 1, :) );
+            rgb_color = cmap(idx, :);
+            rgb_color = rgb_color(1, :); % 1st row only (uniform color over level set)
+        case 'scaled'
+            cdata = get(curhc, 'CData');
+            siz = size(cdata);
+            
+            % scaled to directly indexed colors
+            cax = caxis(ax);
+            idx = ceil( (double(cdata) -cax(1) ) / (cax(2) -cax(1) ) *nColors);
+            
+            % fix end colors
+            idx(idx < 1) = 1;
+            idx(idx > nColors) = nColors;
+            
+            % handle nans in idx
+            nanmask = isnan(idx);
+            idx(nanmask) = 1; %temporarily replace w/ a valid colormap index
+            
+            realcolor = zeros(siz);
+            for j = 1:3,
+                c = cmap(idx, j);
+                c = reshape(c, siz);
+                realcolor(:, :, j) = c;
+            end
+            rgb_color = squeeze(realcolor);
+            rgb_color = rgb_color(1, :); % 1st row only (uniform color over level set)
+        otherwise
+            error('patch:colors', 'Unknown CDataMapping property value.')
+    end
+    
+    %% augment
+    n_line_segments = size(curv, 2);
+    I = (k +1) : (k +n_line_segments);
+    k = k +n_line_segments;
+    
+    vertices(1, I) = curv;
+    edges(1, I) = cure;
+    colors(1, I) = {rgb_color};
 end
 
 % LineStyle = {-} | -- | : | -. | none
-

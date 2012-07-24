@@ -29,6 +29,9 @@ function [] = latex2pdf3d(fname, latex_compiler)
 %       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
 %   and is covered by the BSD License.
 
+% depends
+%   {pdflatex | xelatex}, {media9 | movie15}
+
 %% input
 if nargin < 1
     fname = 'matfig';
@@ -39,11 +42,14 @@ if nargin < 2
 end
 
 %% Use pdflatex to generate the pdf
-if strcmp(latex_compiler, 'pdflatex')
-    cmd = ['pdflatex --interaction=nonstopmode ', fname, '.tex'];
-else
-    cmd = ['xelatex --interaction=nonstopmode ', fname, '.tex'];
-end
+switch latex_compiler
+    case 'pdflatex'
+        cmd = ['pdflatex --interaction=nonstopmode ', fname, '.tex'];
+    case 'xelatex'
+        cmd = ['xelatex --interaction=nonstopmode ', fname, '.tex'];
+    otherwise
+        error('latex:compiler', 'Unknown LaTeX compiler.')
+end 
 
 status = system(cmd);
 if status ~= 0

@@ -6,6 +6,9 @@ function [nodes] = idtf_model_nodes(n_meshes, n_lines, n_pointsets)
 % Purpose:   create IDTF model nodes
 % Copyright: Ioannis Filippidis, 2012-
 
+% depends
+%   verbatim
+
 %% mesh nodes
 mesh_node = mesh_node_str;
 temp_nodes = cell(1, n_meshes);

@@ -9,8 +9,9 @@ function [] = doc_examples
 %fname = two_variable_func;
 %fname = three_variable_level_set;
 %fname = molecule_structure;
-fname = Wind;
-%fig2u3d(gca, fname, '-pdf')
+%fname = robotic_manipulator;
+fname = fluid_flow;
+fig2u3d(gca, fname, '-pdf')
 
 function [fname] = two_variable_func
 %f(x,y) surface, gradient, contours

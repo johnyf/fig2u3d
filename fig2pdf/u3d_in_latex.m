@@ -47,39 +47,26 @@ function [str] = latex_include_using_media9
 % U3D file name (w/o extension) = string
 str = verbatim;
 %{
-%%\\begin{center}
-    \\includemedia[%%
-    width=\\linewidth,%%
-    height=\\linewidth,%%
-    activate=pagevisible,%%
-    deactivate=pageinvisible,%%
-    3Dviews=%s.vws,%%
-    3Dtoolbar]{%%
-        \\includegraphics[width=\\linewidth]{%s.png}%%
-    }{%s.u3d}%%
-%%\\end{center}
+\\includemedia[%%
+width=\\linewidth,%%
+height=\\linewidth,%%
+activate=pagevisible,%%
+deactivate=pageinvisible,%%
+3Dviews=%s.vws,%%
+3Dtoolbar]{%%
+    \\includegraphics[width=\\linewidth]{%s.png}%%
+}{%s.u3d}%%
 %}
 
 function [str] = latex_include_using_movie15
 % u3dfile = string,
 % u3dfile = string,
-% 3Daac = float,
-% 3Dc2c = float, float, float,
-% 3Droo = float
+% u3dfile = string
 str = verbatim;
 %{
-\\begin{center}
-    \\includemovie[%%
-    poster,%%
-    toolbar,%%
-    label=%s.u3d,%%
-    text=(%s.u3d),%%
-    3Daac=%d,%%
-    3Droll=0,%%
-    3Dc2c=%f %f %f,%%
-    3Droo=%f,%%
-    3Dcoo=0 0 0,%%
-    3Dlights=CAD]{\\linewidth}{\\linewidth}%%
-    {%s.u3d}
-\\end{center}
+\\includemovie[%%
+poster=%s.png,%%
+3Dviews2=%s.vws,%%
+autoplay,%%
+toolbar]{\\linewidth}{\\linewidth}{%s.u3d}
 %}

@@ -221,39 +221,8 @@ end
 
 %edges = [1:(npnt-1); 2:npnt]-1;
 
-%% temporary solution to reduces compression problems
+%% temporary solution to reduces compression problems after idtf2u3d.exe
 piece_size = 10;
-v = cut_line_to_pieces(lv, piece_size);
-
-n = size(v, 2);
-vertices = cell(1, n);
-edges = cell(1, n);
-line_colors = cell(1, n);
-for i=1:n
-    curv = v{1, i};
-    
-    %% connect to next line
-    if i < n
-        nv = size(curv, 2);
-        next_line_v = v{1, i+1};
-        vertex1_in_next_line = next_line_v(:, 1);
-        
-        curv(:, nv) = vertex1_in_next_line;
-    end
-    
-    %% dashed style ?
-    if 0 < dashratio
-        nv = floor(piece_size /2);
-        nv = max(1, nv);
-        curv = curv(:, 1:nv); % keep half
-    end
-    
-    %% create line
-    npnt = size(curv, 2);
-    curedges = [1:(npnt-1); 2:npnt]-1;
-    
-    %% output
-    vertices{1, i} = curv;
-    edges{1, i} = curedges;
-    line_colors{1, i} = line_color;
-end
+[vertices, edges] = line_pieces(lv, piece_size, dashratio);
+n = size(vertices, 2);
+line_colors = repmat({line_color}, 1, n);

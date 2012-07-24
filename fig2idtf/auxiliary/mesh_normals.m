@@ -30,6 +30,3 @@ close(hf);
 norms = sqrt(sum(normals.*conj(normals),2));
 gidx = find(norms);
 normals(gidx,:) = - normals(gidx,:) ./ repmat(norms(gidx),1,3);
-
-end %  function
-
