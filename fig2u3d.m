@@ -22,6 +22,13 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 %   used for 2D export. Arguments defining 2D export options need conform
 %   to the export function used.
 %
+%   The IDTF2U3D executables are needed from:
+%       http://sourceforge.net/projects/u3d/
+%   To obtain them download:
+%       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
+%   and place the "bin" directory in the "idtf2u3d" directory of the
+%   fig2u3d distribution.
+%
 % usage
 %   FIG2U3D
 %   FIG2U3D(ax, fname, imgtype, addaxes, varargin)
@@ -63,6 +70,12 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 %   MATLAB plot window. To avoid this, edit the "fix_daspect = 1;" line in
 %   fig2u3d to "fix_daspect = 0;".
 %
+% dependency
+%   IDTF2U3D executables, download:
+%       http://www.mathworks.com/matlabcentral/fileexchange/25383-matlab-mesh-to-pdf-with-3d-interactive-object
+%   and place the "bin" directory within the "idtf2u3d" directory of the
+%   fig2u3d distribution.
+%
 % optional dependency
 %   export_fig, for saving an accompanying 2D image to substitute the 3D
 %   inetractive figure in PDF readers which do not render it.
@@ -80,7 +93,7 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 %
 % File:      fig2u3d.m
 % Author:    Ioannis Filippidis, jfilippidis@gmail.com
-% Date:      2012.06.10 - 2012.06.15
+% Date:      2012.06.10 - 2012.07.26
 % Language:  MATLAB R2012a
 % Purpose:   convert figure to U3D file format (lines, surfaces, points)
 % Copyright: Ioannis Filippidis, 2012-
@@ -280,6 +293,11 @@ if exist('export_fig', 'file') == 2
     
     set(fighandle, 'Color', col) % restore color
 else
+	if strfind(imgtype, 'pdf')
+        imgtype = '-dpdf';
+    elseif strfind(imgtype, 'png')
+        imgtype = '-dpng';
+    end
     print(fighandle, imgtype, varargin{:}, fname)
 end
 
