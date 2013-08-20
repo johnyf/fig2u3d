@@ -30,8 +30,10 @@ disp(['Writing: ', texfile] );
 %[~, u3dfname] = fileparts(fname);
 if strcmp(media9_or_movie15, 'media9')
     content = latex_include_using_media9;
-else
+elseif strcmp(media9_or_movie15, 'movie15')
     content = latex_include_using_movie15;
+else
+    error('media9 or movie15 are the only available choices.')
 end
 
 fid = fopen(texfile, 'w');
