@@ -203,7 +203,7 @@ switch linestyle
         dashratio = 0.5;
         [vertices, edges, line_colors] = solid_line_prep(h, dashratio);
     otherwise
-        error('Unknown LineStyle')
+        error(['Unsupported LineStyle:', linestyle] )
 end
 
 function [vertices, edges, line_colors] = solid_line_prep(h, dashratio)

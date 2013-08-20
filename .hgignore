@@ -1,4 +1,5 @@
 syntax: glob
+# tex
 *.pyc
 *.pov
 *.aux
@@ -18,10 +19,9 @@ syntax: glob
 *.nav #beamer
 *.xdv
 *.gz_temp
-#
+# hg
 *.hgignore
-*.bat
-#
+# images /graphics
 *.jpeg
 *.JPEG
 *.jpg
@@ -48,33 +48,37 @@ syntax: glob
 *.tim
 *.ipt
 *.ipa
-#
+# data files
 *.txt
 *.dot
 *.mat
 *.fig
-#
+# Microsoft Office
 *.doc
 *.docx
 *.xls
 *.rtf
 *.ppt
-#
+# Archives
 *.tar
 *.gz
 *.rar
 *.zip
 *.7z
 *.osm #openstreetmap
-#
+# Windows
+*.bat
 *.exe
 *.dll
 *.msi
 *.ini
 *.db
+# Linux
 *.lnk
 *.so
-#
+# MAC OSX
+*.DS_Store
+# Multimedia
 *.avi
 *.wav
 *.mwv

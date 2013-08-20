@@ -68,6 +68,7 @@ for i=1:N
     h = sh(i, 1);
     
     [v, f, fvx, r] = single_patch_preprocessor(h);
+    disp('Face Vertex Size of patch:')
     size(fvx)
     vertices{1, i} = v;
     faces{1, i} = f;
@@ -111,6 +112,7 @@ vertices = vertices.';
 %% fix face color if needed (after faces have been removed)
 facecolor = get(h, 'FaceColor');
 if isempty(facevertexcdata) && ~ischar(facecolor)
+    ddisp('Patch: Fixing face color')
     nfaces = size(faces, 1);
     facevertexcdata = repmat(facecolor, nfaces, 1);
 end
@@ -124,12 +126,21 @@ if m == 3
     return
 end
 
+%% continue only if indexed colors need be replaced with RGB from colormap
 % not indexed colors ?
 if m ~= 1
-    error('u3dpatch:FaceVertexCData', 'size(FaceVertexCData, 3) \notin {1, 3}')
+    error('u3dpatch:FaceVertexCData', 'size(FaceVertexCData, 2) \notin {1, 3}')
 end
 
 ax = get(h, 'Parent');
+
+% single row ? - fix to avoid errors later when exporting
+if size(facevertexcdata, 1) 
+    disp('Patch: Single row FaceVerteXCData, replicating for all faces.')
+    nfaces = size(faces, 1);
+    facevertexcdata = repmat(facevertexcdata, nfaces, 1);
+end
+
 facevertexcdata = scaled_ind2rgb(facevertexcdata, ax);
 
 function [realcolor] = scaled_ind2rgb(cdata, ax)

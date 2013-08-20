@@ -67,24 +67,36 @@ u3dfile = full_fname_with_extension(u3dfile, 'u3d');
 
 %% prepare command
 mfiledir = fileparts(mfilename('fullpath') );
+curpath = pwd;
 
-IDTFcmd = 'IDTFConverter';
-if isunix
-    if strcmp('MACI', computer)
-        % Intel Mac
-        temp = [getenv('DYLD_LIBRARY_PATH'), ':"', mfiledir, '/bin/maci/"'];
-        setenv('DYLD_LIBRARY_PATH', temp)
-        IDTFcmd = ['"', mfiledir, '/bin/maci/', IDTFcmd, '"'];
-    else
-        % Linux
-        temp = [getenv('LD_LIBRARY_PATH'), ':"', mfiledir, '/bin/glx/"'];
-        setenv('LD_LIBRARY_PATH', temp)
-        IDTFcmd = ['"', mfiledir, '/bin/glx/', IDTFcmd, '.sh"'];
-    end
-else
-    % windows
+% Intel Mac
+if ismac
+    idtf_executable_path = [mfiledir, '/bin/maci/'];
+    cd(idtf_executable_path)
+    
+    IDTFcmd = './IDTFConverter';
+    
+    %temp = [getenv('DYLD_LIBRARY_PATH'), ':"', mfiledir, '/bin/maci/"'];
+    %setenv('DYLD_LIBRARY_PATH', temp)
+    %IDTFcmd = ['"', mfiledir, '/bin/maci/', IDTFcmd, '"'];
+end
+
+% Linux
+if isunix && ~ismac
+    idtf_executable_path = [mfiledir, '/bin/glx/'];
+    cd(idtf_executable_path)
+    
+    IDTFcmd = './IDTFConverter.sh';
+    
+    %temp = [getenv('LD_LIBRARY_PATH'), ':"', mfiledir, '/bin/glx/"'];
+    %setenv('LD_LIBRARY_PATH', temp)
+    %IDTFcmd = ['"', mfiledir, '/bin/glx/', IDTFcmd, '.sh"'];
+end
+
+% windows
+if ispc
     win_mfiledir = strrep(mfiledir, '\', '\\');
-    IDTFcmd = ['"', win_mfiledir, '\\bin\\w32\\', IDTFcmd, '.exe"'];
+    IDTFcmd = ['"', win_mfiledir, '\\bin\\w32\\IDTFConverter.exe"'];
 end
 
 %% idtf -> u3d conversion
@@ -92,12 +104,13 @@ s = [IDTFcmd, ' -input "%s" -output "%s"'];
 idtf2u3dcmd = sprintf(s, idtffile, u3dfile);
 disp(idtf2u3dcmd)
 [status, result] = system(idtf2u3dcmd);
+cd(curpath) % go back
 
+disp(result)
 if status ~= 0
     error('idtf2u3d:conversion',...
-          'IDTFConverter.exe returned with error.')
+          'IDTFConverter executable returned with error.')
 end
-disp(result)
 
 function [fname] = full_fname_with_extension(fname, extension)
 fname = check_file_extension(fname, extension);

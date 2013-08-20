@@ -42,6 +42,8 @@ for i=1:n_meshes
         str2 = sprintf(material_resource_str(use_vertex_color), [shidx, shidx, face_vertex_data_unique].');
         
         cur_n_shaders = nface_vertex_data_unique;
+    else
+        warning('shader:color', 'use_vertex_color: nfvd \notin {npoints, nfaces}')
     end
     
     shader_resources{1, i} = sprintf(shader_resource_str(use_vertex_color), [shidx, shidx, shidx].');

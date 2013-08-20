@@ -110,6 +110,9 @@ function [] = fig2u3d(ax, fname, imgtype, addaxes, varargin)
 %   surface texturemapping not exported
 %   filled contourplots not exported
 
+% todo
+%   use viewmtx
+
 %% input
 if nargin < 1
     ax = gca;
@@ -293,7 +296,7 @@ if exist('export_fig', 'file') == 2
     
     set(fighandle, 'Color', col) % restore color
 else
-	if strfind(imgtype, 'pdf')
+    if strfind(imgtype, 'pdf')
         imgtype = '-dpdf';
     elseif strfind(imgtype, 'png')
         imgtype = '-dpng';
