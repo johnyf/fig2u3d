@@ -49,7 +49,6 @@ syntax: glob
 *.ipt
 *.ipa
 # data files
-*.txt
 *.dot
 *.mat
 *.fig
@@ -65,7 +64,7 @@ syntax: glob
 *.rar
 *.zip
 *.7z
-*.osm #openstreetmap
+*.osm
 # Windows
 *.bat
 *.exe
@@ -84,8 +83,7 @@ syntax: glob
 *.mwv
 *.mp3
 *.mp4
-
 # site-specific
-./idtf2u3d/bin/*
+idtf2u3d/bin/*
 *.u3d
 *.vws
