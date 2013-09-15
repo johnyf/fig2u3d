@@ -85,5 +85,6 @@ syntax: glob
 *.mp4
 # site-specific
 idtf2u3d/bin/*
+dist/*
 *.u3d
 *.vws
