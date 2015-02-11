@@ -112,7 +112,7 @@ vertices = vertices.';
 %% fix face color if needed (after faces have been removed)
 facecolor = get(h, 'FaceColor');
 if isempty(facevertexcdata) && ~ischar(facecolor)
-    ddisp('Patch: Fixing face color')
+    disp('Patch: Fixing face color')
     nfaces = size(faces, 1);
     facevertexcdata = repmat(facecolor, nfaces, 1);
 end
