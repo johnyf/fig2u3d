@@ -6,11 +6,11 @@ Summary
 Export figure as a U3D file or directly to 3D interactive graphics within a PDF.
 Licensed under 2-clause BSD.
 
-[Documentation](https://www.cds.caltech.edu/~ifilippi/temp/releases/matlab/fig2u3d/fig2u3d_manual.pdf)
+[Documentation](https://github.com/johnyf/binaries/raw/master/fig2u3d/fig2u3d_manual.pdf)
 
-[PDF created](https://www.cds.caltech.edu/~ifilippi/temp/releases/matlab/fig2u3d/example.pdf) for figure below (3d <font color="red">needs</font> [Adobe Reader](http://get.adobe.com/reader/)).
+[PDF created](https://github.com/johnyf/binaries/raw/master/fig2u3d/example.pdf) for figure below (3d <font color="red">needs</font> [Adobe Reader](http://get.adobe.com/reader/)).
 
-<img src="https://www.cds.caltech.edu/~ifilippi/temp/releases/matlab/fig2u3d/logo.png" width=200>
+<img src="https://raw.githubusercontent.com/johnyf/binaries/master/fig2u3d/logo.png" width=200>
 
 The `LaTeX` needed looks like:
 
@@ -60,7 +60,7 @@ Graphics object supported for export include:
 
 Line colors and marker styles, surfaces and `quivers` with `NaN`s and surface shading are supported. Multiple instances of various objects can be plotted in the same axes and exported. Note that some limitations apply, for example filled contours are not yet supported.
 
-<img src="https://www.cds.caltech.edu/~ifilippi/temp/releases/matlab/fig2u3d/fig2u3d_workflow.png" width=400>
+<img src="https://raw.githubusercontent.com/johnyf/binaries/master/fig2u3d/fig2u3d_workflow.png" width=400>
 
 ## Installation
 
