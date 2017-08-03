@@ -114,4 +114,6 @@ end
 
 function [fname] = full_fname_with_extension(fname, extension)
 fname = check_file_extension(fname, extension);
-fname  = fullfile(cd, fname);
+if(isempty(fileparts(fname)))
+    fname  = fullfile(cd, fname);
+end
