@@ -24,7 +24,7 @@ end
 
 hf = figure('Visible','off');
 hp = patch('vertices',points,'faces',faces);
-normals = get(hp,'VertexNormals');
+normals = get(hp,'Vertices'); % workaround
 close(hf);
 %Make the normals unit norm
 norms = sqrt(sum(normals.*conj(normals),2));
