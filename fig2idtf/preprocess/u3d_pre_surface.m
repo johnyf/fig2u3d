@@ -143,12 +143,12 @@ if strcmp(facecolor, 'texturemap')
     realcolor = [];
     return
 end
-cdata = get(h, 'CData');
 
 % texturemapping is when CData is an image and has different size than
 % XData and the number of faces, so it is not treated here yet.
 
 %% CData
+cdata = get(h, 'CData');
 k = size(cdata, 3);
 
 % true color ?
@@ -166,19 +166,8 @@ end
 
 %% indexed color to RGB true color
 ax = get(h, 'Parent');
-while(~strcmp(ax.Type, 'axes'))  % e.g. hggroup
-    ax = get(ax, 'Parent'); % move upwards 
-end
 realcolor = scaled_ind2rgb(cdata, ax);
 
-%% single color set HA
-if(length(facecolor) == 3)
-   realcolor = zeros(size(cdata,1),size(cdata,2),3);
-   realcolor(:,:,1) = facecolor(1);
-   realcolor(:,:,2) = facecolor(2);
-   realcolor(:,:,3) = facecolor(3);
-   return
-end
 function [realcolor] = scaled_ind2rgb(cdata, ax)
 [n, m] = size(cdata);
 cdata = double(cdata);
