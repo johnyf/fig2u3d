@@ -50,15 +50,16 @@ else
 end
 
 % hggroup = contourgroup ?
+noCGroupLIdxs =  false(length(sh),1);
 for i=1:size(sh, 1)
     cursh = sh(i, 1);
     
     if ~isprop(cursh, 'ContourMatrix')
-        sh(i, 1) = nan;
+        noCGroupLIdxs(i) = true;
     end
 end
 
-sh(isnan(sh) ) = [];
+sh(noCGroupLIdxs) = [];
 
 if isempty(sh)
     vertices = [];
