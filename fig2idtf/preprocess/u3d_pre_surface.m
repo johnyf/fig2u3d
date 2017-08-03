@@ -166,6 +166,9 @@ end
 
 %% indexed color to RGB true color
 ax = get(h, 'Parent');
+while(~strcmp(ax.Type, 'axes'))  % e.g. hggroup
+    ax = get(ax, 'Parent'); % move upwards 
+end
 realcolor = scaled_ind2rgb(cdata, ax);
 
 function [realcolor] = scaled_ind2rgb(cdata, ax)
