@@ -171,6 +171,14 @@ while(~strcmp(ax.Type, 'axes'))  % e.g. hggroup
 end
 realcolor = scaled_ind2rgb(cdata, ax);
 
+%% single rgb-color triplet set (to be applied for the complete surface) HA
+if(length(facecolor) == 3)
+   realcolor = zeros(size(cdata,1),size(cdata,2),3);
+   realcolor(:,:,1) = facecolor(1);
+   realcolor(:,:,2) = facecolor(2);
+   realcolor(:,:,3) = facecolor(3);
+end
+
 function [realcolor] = scaled_ind2rgb(cdata, ax)
 [n, m] = size(cdata);
 cdata = double(cdata);
