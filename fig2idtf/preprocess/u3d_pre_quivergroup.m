@@ -52,15 +52,16 @@ else
 end
 
 % hggroup = quivergroup ?
+noQGroupLIdxs =  false(length(sh),1);
 for i=1:size(sh, 1)
     cursh = sh(i, 1);
     
     if ~isprop(cursh, 'ShowArrowHead')
-        sh(i, 1) = nan;
+        noQGroupLIdxs(i) = true;
     end
 end
 
-sh(isnan(sh) ) = [];
+sh(noQGroupLIdxs) = [];
 
 if isempty(sh)
     vertices = [];
