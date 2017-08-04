@@ -45,7 +45,7 @@ if nargin < 1
     sh = findobj('flat', 'type', 'patch');
 else
     objs = get(ax, 'Children');
-    sh = findobj(objs, 'flat', 'type', 'patch');
+    sh = findobj(objs, 'type', 'patch'); %HA: was ''flat'
 end
 
 if isempty(sh)
